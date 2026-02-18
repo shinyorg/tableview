@@ -42,8 +42,8 @@ jobs:
 #        version: '13'
 #        architecture: x64
 
-#    - name: Add .NET Workloads
-#      run: dotnet workload install maui
+    - name: Add .NET Workloads
+      run: dotnet workload install maui
 
 #    - name: Setup Nerdbank GitVersioning
 #      uses: dotnet/nbgv@master
