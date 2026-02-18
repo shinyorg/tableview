@@ -41,8 +41,6 @@ public class TimePickerCell : CellBase
 
     protected override View? CreateAccessoryView()
     {
-        var layout = new Grid();
-
         _valueLabel = new Label
         {
             VerticalOptions = LayoutOptions.Center,
@@ -51,21 +49,31 @@ public class TimePickerCell : CellBase
 
         _hiddenPicker = new TimePicker
         {
-            Opacity = 0,
-            InputTransparent = true
+            Opacity = 0.01
         };
         _hiddenPicker.PropertyChanged += (s, e) =>
         {
             if (e.PropertyName == nameof(TimePicker.Time))
                 Time = _hiddenPicker.Time ?? TimeSpan.Zero;
         };
+        _hiddenPicker.Focused += (s, e) => ApplySelectionHighlight();
         _hiddenPicker.Unfocused += (s, e) => ClearSelectionHighlight();
 
-        layout.Children.Add(_hiddenPicker);
-        layout.Children.Add(_valueLabel);
+        // Overlay the transparent picker across the entire cell so tapping
+        // anywhere opens the native time dialog (Focus() is unreliable on Android)
+        Grid.SetColumn(_hiddenPicker, 0);
+        Grid.SetColumnSpan(_hiddenPicker, 3);
+        Grid.SetRow(_hiddenPicker, 0);
+        Grid.SetRowSpan(_hiddenPicker, 2);
+        RootGrid.Children.Add(_hiddenPicker);
 
         UpdateDisplayText();
-        return layout;
+        return _valueLabel;
+    }
+
+    protected override void OnCellTapped(object? sender, TappedEventArgs e)
+    {
+        // Native picker overlay handles all touch interaction
     }
 
     private void OnTimeChanged()
@@ -89,12 +97,5 @@ public class TimePickerCell : CellBase
             _valueLabel.TextColor = color;
         else
             _valueLabel.ClearValue(Label.TextColorProperty);
-    }
-
-    protected override bool ShouldKeepSelection() => true;
-
-    protected override void OnTapped()
-    {
-        _hiddenPicker.Focus();
     }
 }

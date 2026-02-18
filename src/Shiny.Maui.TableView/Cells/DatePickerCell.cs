@@ -70,8 +70,6 @@ public class DatePickerCell : CellBase
 
     protected override View? CreateAccessoryView()
     {
-        var layout = new Grid();
-
         _valueLabel = new Label
         {
             VerticalOptions = LayoutOptions.Center,
@@ -80,19 +78,33 @@ public class DatePickerCell : CellBase
 
         _hiddenPicker = new DatePicker
         {
-            Opacity = 0,
-            InputTransparent = true,
+            Opacity = 0.01,
             MinimumDate = MinimumDate,
             MaximumDate = MaximumDate
         };
+
+        if (!Date.HasValue)
+            _hiddenPicker.Date = InitialDate;
+
         _hiddenPicker.DateSelected += (s, e) => Date = e.NewDate;
+        _hiddenPicker.Focused += (s, e) => ApplySelectionHighlight();
         _hiddenPicker.Unfocused += (s, e) => ClearSelectionHighlight();
 
-        layout.Children.Add(_hiddenPicker);
-        layout.Children.Add(_valueLabel);
+        // Overlay the transparent picker across the entire cell so tapping
+        // anywhere opens the native date dialog (Focus() is unreliable on Android)
+        Grid.SetColumn(_hiddenPicker, 0);
+        Grid.SetColumnSpan(_hiddenPicker, 3);
+        Grid.SetRow(_hiddenPicker, 0);
+        Grid.SetRowSpan(_hiddenPicker, 2);
+        RootGrid.Children.Add(_hiddenPicker);
 
         UpdateDisplayText();
-        return layout;
+        return _valueLabel;
+    }
+
+    protected override void OnCellTapped(object? sender, TappedEventArgs e)
+    {
+        // Native picker overlay handles all touch interaction
     }
 
     private void OnDateChanged()
@@ -123,15 +135,5 @@ public class DatePickerCell : CellBase
             _valueLabel.TextColor = color;
         else
             _valueLabel.ClearValue(Label.TextColorProperty);
-    }
-
-    protected override bool ShouldKeepSelection() => true;
-
-    protected override void OnTapped()
-    {
-        if (!Date.HasValue)
-            _hiddenPicker.Date = InitialDate;
-
-        _hiddenPicker.Focus();
     }
 }

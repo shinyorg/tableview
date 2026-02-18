@@ -86,8 +86,6 @@ public class TextPickerCell : CellBase
 
     protected override View? CreateAccessoryView()
     {
-        var layout = new Grid();
-
         _valueLabel = new Label
         {
             VerticalOptions = LayoutOptions.Center,
@@ -96,8 +94,7 @@ public class TextPickerCell : CellBase
 
         _hiddenPicker = new Picker
         {
-            Opacity = 0,
-            InputTransparent = true,
+            Opacity = 0.01,
             Title = PickerTitle
         };
         _hiddenPicker.SelectedIndexChanged += (s, e) =>
@@ -109,12 +106,23 @@ public class TextPickerCell : CellBase
             if (SelectedCommand?.CanExecute(SelectedItem) == true)
                 SelectedCommand.Execute(SelectedItem);
         };
+        _hiddenPicker.Focused += (s, e) => ApplySelectionHighlight();
         _hiddenPicker.Unfocused += (s, e) => ClearSelectionHighlight();
 
-        layout.Children.Add(_hiddenPicker);
-        layout.Children.Add(_valueLabel);
+        // Overlay the transparent picker across the entire cell so tapping
+        // anywhere opens the native picker dialog (Focus() is unreliable on Android)
+        Grid.SetColumn(_hiddenPicker, 0);
+        Grid.SetColumnSpan(_hiddenPicker, 3);
+        Grid.SetRow(_hiddenPicker, 0);
+        Grid.SetRowSpan(_hiddenPicker, 2);
+        RootGrid.Children.Add(_hiddenPicker);
 
-        return layout;
+        return _valueLabel;
+    }
+
+    protected override void OnCellTapped(object? sender, TappedEventArgs e)
+    {
+        // Native picker overlay handles all touch interaction
     }
 
     private void UpdatePickerItems()
@@ -162,12 +170,5 @@ public class TextPickerCell : CellBase
             _valueLabel.TextColor = color;
         else
             _valueLabel.ClearValue(Label.TextColorProperty);
-    }
-
-    protected override bool ShouldKeepSelection() => true;
-
-    protected override void OnTapped()
-    {
-        _hiddenPicker.Focus();
     }
 }

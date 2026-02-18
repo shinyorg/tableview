@@ -234,6 +234,17 @@ public partial class TableView : ContentView
 
         try
         {
+            // Detach all cells from their current parent views before clearing.
+            // Android requires native views to be removed from their parent ViewGroup
+            // before they can be re-added to a new one.
+            foreach (var section in GetAllSections())
+            {
+                foreach (var cell in section.GetVisibleCells())
+                {
+                    (cell.Parent as Layout)?.Remove(cell);
+                }
+            }
+
             _rootLayout.Children.Clear();
 
             var allSections = GetAllSections();

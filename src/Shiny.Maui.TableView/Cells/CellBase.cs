@@ -617,6 +617,15 @@ public abstract class CellBase : ContentView
 
     internal void ClearSelectionHighlight() => UpdateCellBackground();
 
+    internal void ApplySelectionHighlight()
+    {
+        var color = SelectedColor ?? ParentTableView?.CellSelectedColor;
+        if (color != null)
+            BackgroundColor = color;
+    }
+
+    protected void RaiseTapped() => Tapped?.Invoke(this, EventArgs.Empty);
+
     private async void ShowTapFeedback()
     {
         var color = SelectedColor ?? ParentTableView?.CellSelectedColor;
