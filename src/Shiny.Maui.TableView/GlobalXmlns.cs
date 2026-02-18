@@ -1,0 +1,6 @@
+[assembly: Microsoft.Maui.Controls.XmlnsDefinition("http://shiny.net/maui/tableview", "Shiny.Maui.TableView")]
+[assembly: Microsoft.Maui.Controls.XmlnsDefinition("http://shiny.net/maui/tableview", "Shiny.Maui.TableView.Controls")]
+[assembly: Microsoft.Maui.Controls.XmlnsDefinition("http://shiny.net/maui/tableview", "Shiny.Maui.TableView.Sections")]
+[assembly: Microsoft.Maui.Controls.XmlnsDefinition("http://shiny.net/maui/tableview", "Shiny.Maui.TableView.Cells")]
+[assembly: Microsoft.Maui.Controls.XmlnsDefinition("http://shiny.net/maui/tableview", "Shiny.Maui.TableView.Pages")]
+[assembly: Microsoft.Maui.Controls.XmlnsPrefix("http://shiny.net/maui/tableview", "tv")]

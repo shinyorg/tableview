@@ -1,0 +1,22 @@
+AppBundleName=TableView Sample
+ApplicationDisplayVersion=1.0
+ApplicationId=com.shiny.tableview.sample
+ApplicationTitle=TableView Sample
+ApplicationVersion=1
+AppManifest=
+CompiledAppManifest=obj/Debug/net10.0-maccatalyst/maccatalyst-arm64/AppManifest.plist
+DefaultSdkVersion=26.2
+FontFilesToRegister=
+GenerateApplicationManifest=true
+IsAppExtension=false
+MinSupportedOSPlatformVersion=15.0
+PartialAppManifests=
+ProjectDir=/Users/allanritchie/Desktop/shinyorg/shinytableview/samples/Sample.App
+ResourcePrefix=Platforms/MacCatalyst/Resources
+ResourceRules=
+SdkIsSimulator=False
+SdkVersion=26.2
+SupportedOSPlatformVersion=15.0
+TargetArchitectures=ARM64
+TargetFrameworkMoniker=.NETCoreApp,Version=v10.0,Profile=maccatalyst
+Validate=true

@@ -1,0 +1,112 @@
+using Microsoft.Maui.Controls;
+using Microsoft.Maui.Graphics;
+using TvTableView = Shiny.Maui.TableView.Controls.TableView;
+
+namespace Shiny.Maui.TableView.Cells;
+
+public class DatePickerCell : CellBase
+{
+    private Label _valueLabel = default!;
+    private DatePicker _hiddenPicker = default!;
+
+    public static readonly BindableProperty DateProperty = BindableProperty.Create(
+        nameof(Date), typeof(DateTime), typeof(DatePickerCell), DateTime.Today,
+        BindingMode.TwoWay,
+        propertyChanged: (b, o, n) => ((DatePickerCell)b).OnDateChanged());
+
+    public static readonly BindableProperty MinimumDateProperty = BindableProperty.Create(
+        nameof(MinimumDate), typeof(DateTime), typeof(DatePickerCell), new DateTime(1900, 1, 1));
+
+    public static readonly BindableProperty MaximumDateProperty = BindableProperty.Create(
+        nameof(MaximumDate), typeof(DateTime), typeof(DatePickerCell), new DateTime(2100, 12, 31));
+
+    public static readonly BindableProperty FormatProperty = BindableProperty.Create(
+        nameof(Format), typeof(string), typeof(DatePickerCell), "d",
+        propertyChanged: (b, o, n) => ((DatePickerCell)b).UpdateDisplayText());
+
+    public static readonly BindableProperty ValueTextColorProperty = BindableProperty.Create(
+        nameof(ValueTextColor), typeof(Color), typeof(DatePickerCell), null,
+        propertyChanged: (b, o, n) => ((DatePickerCell)b).UpdateValueColor());
+
+    public DateTime Date
+    {
+        get => (DateTime)GetValue(DateProperty);
+        set => SetValue(DateProperty, value);
+    }
+
+    public DateTime MinimumDate
+    {
+        get => (DateTime)GetValue(MinimumDateProperty);
+        set => SetValue(MinimumDateProperty, value);
+    }
+
+    public DateTime MaximumDate
+    {
+        get => (DateTime)GetValue(MaximumDateProperty);
+        set => SetValue(MaximumDateProperty, value);
+    }
+
+    public string Format
+    {
+        get => (string)GetValue(FormatProperty);
+        set => SetValue(FormatProperty, value);
+    }
+
+    public Color? ValueTextColor
+    {
+        get => (Color?)GetValue(ValueTextColorProperty);
+        set => SetValue(ValueTextColorProperty, value);
+    }
+
+    protected override View? CreateAccessoryView()
+    {
+        var layout = new Grid();
+
+        _valueLabel = new Label
+        {
+            VerticalOptions = LayoutOptions.Center,
+            HorizontalOptions = LayoutOptions.End
+        };
+
+        _hiddenPicker = new DatePicker
+        {
+            Opacity = 0,
+            WidthRequest = 0,
+            HeightRequest = 0
+        };
+        _hiddenPicker.DateSelected += (s, e) => Date = e.NewDate ?? DateTime.Today;
+
+        layout.Children.Add(_hiddenPicker);
+        layout.Children.Add(_valueLabel);
+
+        UpdateDisplayText();
+        return layout;
+    }
+
+    private void OnDateChanged()
+    {
+        if (_hiddenPicker != null)
+        {
+            _hiddenPicker.Date = Date;
+            _hiddenPicker.MinimumDate = MinimumDate;
+            _hiddenPicker.MaximumDate = MaximumDate;
+        }
+        UpdateDisplayText();
+    }
+
+    private void UpdateDisplayText()
+    {
+        if (_valueLabel == null) return;
+        _valueLabel.Text = Date.ToString(Format);
+    }
+
+    private void UpdateValueColor()
+    {
+        _valueLabel.TextColor = ResolveColor(ValueTextColor, ParentTableView?.CellValueTextColor, Colors.Gray);
+    }
+
+    protected override void OnTapped()
+    {
+        _hiddenPicker.Focus();
+    }
+}

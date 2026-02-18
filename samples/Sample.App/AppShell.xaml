@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:pages="clr-namespace:Sample.App.Pages"
+    x:Class="Sample.App.AppShell"
+    Title="TableView Sample">
+
+    <FlyoutItem Title="Basic Settings" Icon="">
+        <ShellContent ContentTemplate="{DataTemplate pages:BasicSettingsPage}" Route="basic" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Dynamic Sections" Icon="">
+        <ShellContent ContentTemplate="{DataTemplate pages:DynamicSectionsPage}" Route="dynamic" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Drag &amp; Sort" Icon="">
+        <ShellContent ContentTemplate="{DataTemplate pages:DragSortPage}" Route="dragsort" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Picker Demo" Icon="">
+        <ShellContent ContentTemplate="{DataTemplate pages:PickerDemoPage}" Route="picker" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Styling" Icon="">
+        <ShellContent ContentTemplate="{DataTemplate pages:StylingPage}" Route="styling" />
+    </FlyoutItem>
+
+</Shell>
