@@ -7,6 +7,7 @@
     <File Path=".github\PULL_REQUEST_TEMPLATE.md" />
     <File Path=".github\workflows\build.yml" />
     <File Path=".github\workflows\sync-skills.yml" />
+    <File Path="SKILLS\shiny-tableview\SKILL.md" />
     <File Path="Directory.build.props" />
     <File Path="nuget.png" />
     <File Path="nuget.txt" />
