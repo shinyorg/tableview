@@ -1,7 +1,6 @@
 using System.Windows.Input;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
-using TvTableView = Shiny.Maui.TableView.Controls.TableView;
 
 namespace Shiny.Maui.TableView.Cells;
 
@@ -18,6 +17,10 @@ public class ButtonCell : CellBase
     public static readonly BindableProperty ButtonTextColorProperty = BindableProperty.Create(
         nameof(ButtonTextColor), typeof(Color), typeof(ButtonCell), null,
         propertyChanged: (b, o, n) => ((ButtonCell)b).UpdateButtonColor());
+
+    public static readonly BindableProperty TitleAlignmentProperty = BindableProperty.Create(
+        nameof(TitleAlignment), typeof(TextAlignment), typeof(ButtonCell), TextAlignment.Center,
+        propertyChanged: (b, o, n) => ((ButtonCell)b).UpdateTitleAlignment());
 
     public ICommand? Command
     {
@@ -37,9 +40,14 @@ public class ButtonCell : CellBase
         set => SetValue(ButtonTextColorProperty, value);
     }
 
+    public TextAlignment TitleAlignment
+    {
+        get => (TextAlignment)GetValue(TitleAlignmentProperty);
+        set => SetValue(TitleAlignmentProperty, value);
+    }
+
     public ButtonCell()
     {
-        // ButtonCell uses a different layout - full-width centered text
         BuildButtonLayout();
     }
 
@@ -47,10 +55,11 @@ public class ButtonCell : CellBase
     {
         _buttonLabel = new Label
         {
-            HorizontalOptions = LayoutOptions.Center,
             VerticalOptions = LayoutOptions.Center,
             FontAttributes = FontAttributes.Bold,
-            Padding = new Thickness(16, 12)
+            Padding = new Thickness(16, 12),
+            HorizontalTextAlignment = TextAlignment.Center,
+            HorizontalOptions = LayoutOptions.Fill
         };
         _buttonLabel.SetBinding(Label.TextProperty, new Binding(nameof(Title), source: this));
 
@@ -60,6 +69,11 @@ public class ButtonCell : CellBase
     private void UpdateButtonColor()
     {
         _buttonLabel.TextColor = ButtonTextColor ?? ParentTableView?.CellAccentColor ?? Colors.Blue;
+    }
+
+    private void UpdateTitleAlignment()
+    {
+        _buttonLabel.HorizontalTextAlignment = TitleAlignment;
     }
 
     protected override void OnTapped()

@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.ObjectModel;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
@@ -16,6 +15,8 @@ public class PickerPage : ContentPage
     {
         _ownerCell = ownerCell;
         Title = ownerCell.PageTitle;
+
+        var accentColor = ownerCell.AccentColor ?? ownerCell.ParentTableView?.CellAccentColor ?? Colors.Blue;
 
         _collectionView = new CollectionView
         {
@@ -64,7 +65,7 @@ public class PickerPage : ContentPage
                     Text = "\u2713",
                     FontSize = 20,
                     VerticalOptions = LayoutOptions.Center,
-                    TextColor = Colors.Blue
+                    TextColor = accentColor
                 };
                 checkLabel.SetBinding(Label.IsVisibleProperty, nameof(PickerItemViewModel.IsSelected));
                 Grid.SetColumn(checkLabel, 1);
@@ -101,31 +102,11 @@ public class PickerPage : ContentPage
             _items.Add(new PickerItemViewModel
             {
                 Item = item,
-                DisplayText = GetDisplayText(item),
-                SubDisplayText = GetSubDisplayText(item),
+                DisplayText = _ownerCell.GetDisplayText(item),
+                SubDisplayText = _ownerCell.GetSubDisplayText(item),
                 IsSelected = isSelected
             });
         }
-    }
-
-    private string GetDisplayText(object item)
-    {
-        if (!string.IsNullOrEmpty(_ownerCell.DisplayMember))
-        {
-            var prop = item.GetType().GetProperty(_ownerCell.DisplayMember);
-            return prop?.GetValue(item)?.ToString() ?? item.ToString() ?? string.Empty;
-        }
-        return item.ToString() ?? string.Empty;
-    }
-
-    private string GetSubDisplayText(object item)
-    {
-        if (!string.IsNullOrEmpty(_ownerCell.SubDisplayMember))
-        {
-            var prop = item.GetType().GetProperty(_ownerCell.SubDisplayMember);
-            return prop?.GetValue(item)?.ToString() ?? string.Empty;
-        }
-        return string.Empty;
     }
 
     private async void OnItemTapped(object? sender, TappedEventArgs e)
@@ -135,7 +116,6 @@ public class PickerPage : ContentPage
 
         if (_ownerCell.SelectionMode == Cells.SelectionMode.Single)
         {
-            // Deselect all, select this one
             foreach (var item in _items)
                 item.IsSelected = false;
             vm.IsSelected = true;
@@ -145,7 +125,6 @@ public class PickerPage : ContentPage
         }
         else
         {
-            // Toggle selection
             if (vm.IsSelected)
             {
                 vm.IsSelected = false;
@@ -159,14 +138,12 @@ public class PickerPage : ContentPage
                 vm.IsSelected = true;
             }
 
-            // Update selected items
             var selected = new ObservableCollection<object>();
             foreach (var item in _items.Where(i => i.IsSelected))
                 selected.Add(item.Item);
 
             _ownerCell.OnSelectionComplete(null, selected);
 
-            // Auto-close if UsePickToClose and max reached
             if (_ownerCell.UsePickToClose &&
                 _ownerCell.MaxSelectedNumber > 0 &&
                 selected.Count >= _ownerCell.MaxSelectedNumber)

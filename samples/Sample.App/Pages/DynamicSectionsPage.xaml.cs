@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Windows.Input;
 
 namespace Sample.App.Pages;
@@ -14,7 +13,7 @@ public partial class DynamicSectionsPage : ContentPage
     }
 }
 
-public class DynamicSectionsViewModel : INotifyPropertyChanged
+public class DynamicSectionsViewModel
 {
     private int _counter = 1;
 
@@ -42,8 +41,6 @@ public class DynamicSectionsViewModel : INotifyPropertyChanged
                 Items.RemoveAt(Items.Count - 1);
         });
     }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
 }
 
 public class DynamicItem : INotifyPropertyChanged

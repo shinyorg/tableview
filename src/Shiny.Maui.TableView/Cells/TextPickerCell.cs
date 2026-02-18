@@ -1,7 +1,7 @@
 using System.Collections;
+using System.Windows.Input;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
-using TvTableView = Shiny.Maui.TableView.Controls.TableView;
 
 namespace Shiny.Maui.TableView.Cells;
 
@@ -25,6 +25,18 @@ public class TextPickerCell : CellBase
 
     public static readonly BindableProperty DisplayMemberProperty = BindableProperty.Create(
         nameof(DisplayMember), typeof(string), typeof(TextPickerCell), null);
+
+    public static readonly BindableProperty PickerTitleProperty = BindableProperty.Create(
+        nameof(PickerTitle), typeof(string), typeof(TextPickerCell), null,
+        propertyChanged: (b, o, n) =>
+        {
+            var cell = (TextPickerCell)b;
+            if (cell._hiddenPicker != null)
+                cell._hiddenPicker.Title = (string?)n;
+        });
+
+    public static readonly BindableProperty SelectedCommandProperty = BindableProperty.Create(
+        nameof(SelectedCommand), typeof(ICommand), typeof(TextPickerCell), null);
 
     public static readonly BindableProperty ValueTextColorProperty = BindableProperty.Create(
         nameof(ValueTextColor), typeof(Color), typeof(TextPickerCell), null,
@@ -54,6 +66,18 @@ public class TextPickerCell : CellBase
         set => SetValue(DisplayMemberProperty, value);
     }
 
+    public string? PickerTitle
+    {
+        get => (string?)GetValue(PickerTitleProperty);
+        set => SetValue(PickerTitleProperty, value);
+    }
+
+    public ICommand? SelectedCommand
+    {
+        get => (ICommand?)GetValue(SelectedCommandProperty);
+        set => SetValue(SelectedCommandProperty, value);
+    }
+
     public Color? ValueTextColor
     {
         get => (Color?)GetValue(ValueTextColorProperty);
@@ -74,13 +98,17 @@ public class TextPickerCell : CellBase
         {
             Opacity = 0,
             WidthRequest = 0,
-            HeightRequest = 0
+            HeightRequest = 0,
+            Title = PickerTitle
         };
         _hiddenPicker.SelectedIndexChanged += (s, e) =>
         {
             SelectedIndex = _hiddenPicker.SelectedIndex;
             SelectedItem = _hiddenPicker.SelectedItem;
             UpdateDisplayText();
+
+            if (SelectedCommand?.CanExecute(SelectedItem) == true)
+                SelectedCommand.Execute(SelectedItem);
         };
 
         layout.Children.Add(_hiddenPicker);

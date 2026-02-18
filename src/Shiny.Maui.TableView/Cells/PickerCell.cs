@@ -4,7 +4,6 @@ using System.Windows.Input;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
 using Shiny.Maui.TableView.Pages;
-using TvTableView = Shiny.Maui.TableView.Controls.TableView;
 
 namespace Shiny.Maui.TableView.Cells;
 
@@ -41,6 +40,10 @@ public class PickerCell : CellBase
     public static readonly BindableProperty UsePickToCloseProperty = BindableProperty.Create(
         nameof(UsePickToClose), typeof(bool), typeof(PickerCell), false);
 
+    public static readonly BindableProperty UseAutoValueTextProperty = BindableProperty.Create(
+        nameof(UseAutoValueText), typeof(bool), typeof(PickerCell), true,
+        propertyChanged: (b, o, n) => ((PickerCell)b).UpdateDisplayText());
+
     public static readonly BindableProperty DisplayMemberProperty = BindableProperty.Create(
         nameof(DisplayMember), typeof(string), typeof(PickerCell), null);
 
@@ -56,6 +59,16 @@ public class PickerCell : CellBase
     public static readonly BindableProperty ValueTextColorProperty = BindableProperty.Create(
         nameof(ValueTextColor), typeof(Color), typeof(PickerCell), null,
         propertyChanged: (b, o, n) => ((PickerCell)b).UpdateValueColor());
+
+    public static readonly BindableProperty AccentColorProperty = BindableProperty.Create(
+        nameof(AccentColor), typeof(Color), typeof(PickerCell), null);
+
+    public static readonly BindableProperty KeepSelectedUntilBackProperty = BindableProperty.Create(
+        nameof(KeepSelectedUntilBack), typeof(bool), typeof(PickerCell), false);
+
+    public static readonly BindableProperty ShowArrowProperty = BindableProperty.Create(
+        nameof(ShowArrow), typeof(bool), typeof(PickerCell), true,
+        propertyChanged: (b, o, n) => ((PickerCell)b)._arrowLabel.IsVisible = (bool)n);
 
     public IEnumerable? ItemsSource
     {
@@ -93,6 +106,12 @@ public class PickerCell : CellBase
         set => SetValue(UsePickToCloseProperty, value);
     }
 
+    public bool UseAutoValueText
+    {
+        get => (bool)GetValue(UseAutoValueTextProperty);
+        set => SetValue(UseAutoValueTextProperty, value);
+    }
+
     public string? DisplayMember
     {
         get => (string?)GetValue(DisplayMemberProperty);
@@ -121,6 +140,24 @@ public class PickerCell : CellBase
     {
         get => (Color?)GetValue(ValueTextColorProperty);
         set => SetValue(ValueTextColorProperty, value);
+    }
+
+    public Color? AccentColor
+    {
+        get => (Color?)GetValue(AccentColorProperty);
+        set => SetValue(AccentColorProperty, value);
+    }
+
+    public bool KeepSelectedUntilBack
+    {
+        get => (bool)GetValue(KeepSelectedUntilBackProperty);
+        set => SetValue(KeepSelectedUntilBackProperty, value);
+    }
+
+    public bool ShowArrow
+    {
+        get => (bool)GetValue(ShowArrowProperty);
+        set => SetValue(ShowArrowProperty, value);
     }
 
     protected override View? CreateAccessoryView()
@@ -153,9 +190,11 @@ public class PickerCell : CellBase
         return layout;
     }
 
+    protected override bool ShouldKeepSelection() => KeepSelectedUntilBack;
+
     private void UpdateDisplayText()
     {
-        if (_valueLabel == null) return;
+        if (_valueLabel == null || !UseAutoValueText) return;
 
         if (SelectionMode == SelectionMode.Single && SelectedItem != null)
         {
@@ -174,7 +213,7 @@ public class PickerCell : CellBase
         }
     }
 
-    private string GetDisplayText(object item)
+    internal string GetDisplayText(object item)
     {
         if (!string.IsNullOrEmpty(DisplayMember))
         {
@@ -182,6 +221,16 @@ public class PickerCell : CellBase
             return prop?.GetValue(item)?.ToString() ?? item.ToString() ?? string.Empty;
         }
         return item.ToString() ?? string.Empty;
+    }
+
+    internal string GetSubDisplayText(object item)
+    {
+        if (!string.IsNullOrEmpty(SubDisplayMember))
+        {
+            var prop = item.GetType().GetProperty(SubDisplayMember);
+            return prop?.GetValue(item)?.ToString() ?? string.Empty;
+        }
+        return string.Empty;
     }
 
     private void UpdateValueColor()
@@ -193,6 +242,16 @@ public class PickerCell : CellBase
     {
         var page = GetParentPage();
         if (page?.Navigation == null || ItemsSource == null) return;
+
+        if (KeepSelectedUntilBack)
+        {
+            void handler(object? s, EventArgs args)
+            {
+                ClearSelectionHighlight();
+                page.Appearing -= handler;
+            }
+            page.Appearing += handler;
+        }
 
         var pickerPage = new PickerPage(this);
         await page.Navigation.PushAsync(pickerPage);
@@ -209,17 +268,5 @@ public class PickerCell : CellBase
 
         if (SelectedCommand?.CanExecute(null) == true)
             SelectedCommand.Execute(SelectionMode == SelectionMode.Single ? SelectedItem : SelectedItems);
-    }
-
-    private Page? GetParentPage()
-    {
-        Element? current = this;
-        while (current != null)
-        {
-            if (current is Page page)
-                return page;
-            current = current.Parent;
-        }
-        return null;
     }
 }

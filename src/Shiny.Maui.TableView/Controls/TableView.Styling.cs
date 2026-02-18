@@ -37,8 +37,24 @@ public partial class TableView
         nameof(HeaderFontSize), typeof(double), typeof(TableView), -1d,
         propertyChanged: (b, o, n) => ((TableView)b).RenderSections());
 
+    public static readonly BindableProperty HeaderFontFamilyProperty = BindableProperty.Create(
+        nameof(HeaderFontFamily), typeof(string), typeof(TableView), null,
+        propertyChanged: (b, o, n) => ((TableView)b).RenderSections());
+
+    public static readonly BindableProperty HeaderFontAttributesProperty = BindableProperty.Create(
+        nameof(HeaderFontAttributes), typeof(FontAttributes), typeof(TableView), FontAttributes.Bold,
+        propertyChanged: (b, o, n) => ((TableView)b).RenderSections());
+
     public static readonly BindableProperty HeaderPaddingProperty = BindableProperty.Create(
-        nameof(HeaderPadding), typeof(double), typeof(TableView), -1d,
+        nameof(HeaderPadding), typeof(Thickness), typeof(TableView), new Thickness(14, 8, 8, 8),
+        propertyChanged: (b, o, n) => ((TableView)b).RenderSections());
+
+    public static readonly BindableProperty HeaderHeightProperty = BindableProperty.Create(
+        nameof(HeaderHeight), typeof(double), typeof(TableView), -1d,
+        propertyChanged: (b, o, n) => ((TableView)b).RenderSections());
+
+    public static readonly BindableProperty HeaderTextVerticalAlignProperty = BindableProperty.Create(
+        nameof(HeaderTextVerticalAlign), typeof(LayoutAlignment), typeof(TableView), LayoutAlignment.End,
         propertyChanged: (b, o, n) => ((TableView)b).RenderSections());
 
     public Color? HeaderBackgroundColor
@@ -59,10 +75,34 @@ public partial class TableView
         set => SetValue(HeaderFontSizeProperty, value);
     }
 
-    public double HeaderPadding
+    public string? HeaderFontFamily
     {
-        get => (double)GetValue(HeaderPaddingProperty);
+        get => (string?)GetValue(HeaderFontFamilyProperty);
+        set => SetValue(HeaderFontFamilyProperty, value);
+    }
+
+    public FontAttributes HeaderFontAttributes
+    {
+        get => (FontAttributes)GetValue(HeaderFontAttributesProperty);
+        set => SetValue(HeaderFontAttributesProperty, value);
+    }
+
+    public Thickness HeaderPadding
+    {
+        get => (Thickness)GetValue(HeaderPaddingProperty);
         set => SetValue(HeaderPaddingProperty, value);
+    }
+
+    public double HeaderHeight
+    {
+        get => (double)GetValue(HeaderHeightProperty);
+        set => SetValue(HeaderHeightProperty, value);
+    }
+
+    public LayoutAlignment HeaderTextVerticalAlign
+    {
+        get => (LayoutAlignment)GetValue(HeaderTextVerticalAlignProperty);
+        set => SetValue(HeaderTextVerticalAlignProperty, value);
     }
 
     #endregion
@@ -77,8 +117,20 @@ public partial class TableView
         nameof(FooterFontSize), typeof(double), typeof(TableView), -1d,
         propertyChanged: (b, o, n) => ((TableView)b).RenderSections());
 
+    public static readonly BindableProperty FooterFontFamilyProperty = BindableProperty.Create(
+        nameof(FooterFontFamily), typeof(string), typeof(TableView), null,
+        propertyChanged: (b, o, n) => ((TableView)b).RenderSections());
+
+    public static readonly BindableProperty FooterFontAttributesProperty = BindableProperty.Create(
+        nameof(FooterFontAttributes), typeof(FontAttributes), typeof(TableView), FontAttributes.None,
+        propertyChanged: (b, o, n) => ((TableView)b).RenderSections());
+
     public static readonly BindableProperty FooterPaddingProperty = BindableProperty.Create(
-        nameof(FooterPadding), typeof(double), typeof(TableView), -1d,
+        nameof(FooterPadding), typeof(Thickness), typeof(TableView), new Thickness(14, 8, 8, 8),
+        propertyChanged: (b, o, n) => ((TableView)b).RenderSections());
+
+    public static readonly BindableProperty FooterBackgroundColorProperty = BindableProperty.Create(
+        nameof(FooterBackgroundColor), typeof(Color), typeof(TableView), null,
         propertyChanged: (b, o, n) => ((TableView)b).RenderSections());
 
     public Color? FooterTextColor
@@ -93,10 +145,28 @@ public partial class TableView
         set => SetValue(FooterFontSizeProperty, value);
     }
 
-    public double FooterPadding
+    public string? FooterFontFamily
     {
-        get => (double)GetValue(FooterPaddingProperty);
+        get => (string?)GetValue(FooterFontFamilyProperty);
+        set => SetValue(FooterFontFamilyProperty, value);
+    }
+
+    public FontAttributes FooterFontAttributes
+    {
+        get => (FontAttributes)GetValue(FooterFontAttributesProperty);
+        set => SetValue(FooterFontAttributesProperty, value);
+    }
+
+    public Thickness FooterPadding
+    {
+        get => (Thickness)GetValue(FooterPaddingProperty);
         set => SetValue(FooterPaddingProperty, value);
+    }
+
+    public Color? FooterBackgroundColor
+    {
+        get => (Color?)GetValue(FooterBackgroundColorProperty);
+        set => SetValue(FooterBackgroundColorProperty, value);
     }
 
     #endregion
@@ -109,6 +179,10 @@ public partial class TableView
 
     public static readonly BindableProperty CellTitleFontSizeProperty = BindableProperty.Create(
         nameof(CellTitleFontSize), typeof(double), typeof(TableView), -1d,
+        propertyChanged: OnGlobalStyleChanged);
+
+    public static readonly BindableProperty CellTitleFontFamilyProperty = BindableProperty.Create(
+        nameof(CellTitleFontFamily), typeof(string), typeof(TableView), null,
         propertyChanged: OnGlobalStyleChanged);
 
     public static readonly BindableProperty CellTitleFontAttributesProperty = BindableProperty.Create(
@@ -125,6 +199,12 @@ public partial class TableView
     {
         get => (double)GetValue(CellTitleFontSizeProperty);
         set => SetValue(CellTitleFontSizeProperty, value);
+    }
+
+    public string? CellTitleFontFamily
+    {
+        get => (string?)GetValue(CellTitleFontFamilyProperty);
+        set => SetValue(CellTitleFontFamilyProperty, value);
     }
 
     public FontAttributes? CellTitleFontAttributes
@@ -145,6 +225,14 @@ public partial class TableView
         nameof(CellDescriptionFontSize), typeof(double), typeof(TableView), -1d,
         propertyChanged: OnGlobalStyleChanged);
 
+    public static readonly BindableProperty CellDescriptionFontFamilyProperty = BindableProperty.Create(
+        nameof(CellDescriptionFontFamily), typeof(string), typeof(TableView), null,
+        propertyChanged: OnGlobalStyleChanged);
+
+    public static readonly BindableProperty CellDescriptionFontAttributesProperty = BindableProperty.Create(
+        nameof(CellDescriptionFontAttributes), typeof(FontAttributes?), typeof(TableView), null,
+        propertyChanged: OnGlobalStyleChanged);
+
     public Color? CellDescriptionColor
     {
         get => (Color?)GetValue(CellDescriptionColorProperty);
@@ -155,6 +243,18 @@ public partial class TableView
     {
         get => (double)GetValue(CellDescriptionFontSizeProperty);
         set => SetValue(CellDescriptionFontSizeProperty, value);
+    }
+
+    public string? CellDescriptionFontFamily
+    {
+        get => (string?)GetValue(CellDescriptionFontFamilyProperty);
+        set => SetValue(CellDescriptionFontFamilyProperty, value);
+    }
+
+    public FontAttributes? CellDescriptionFontAttributes
+    {
+        get => (FontAttributes?)GetValue(CellDescriptionFontAttributesProperty);
+        set => SetValue(CellDescriptionFontAttributesProperty, value);
     }
 
     #endregion
@@ -169,6 +269,14 @@ public partial class TableView
         nameof(CellHintTextFontSize), typeof(double), typeof(TableView), -1d,
         propertyChanged: OnGlobalStyleChanged);
 
+    public static readonly BindableProperty CellHintFontFamilyProperty = BindableProperty.Create(
+        nameof(CellHintFontFamily), typeof(string), typeof(TableView), null,
+        propertyChanged: OnGlobalStyleChanged);
+
+    public static readonly BindableProperty CellHintFontAttributesProperty = BindableProperty.Create(
+        nameof(CellHintFontAttributes), typeof(FontAttributes?), typeof(TableView), null,
+        propertyChanged: OnGlobalStyleChanged);
+
     public Color? CellHintTextColor
     {
         get => (Color?)GetValue(CellHintTextColorProperty);
@@ -181,6 +289,18 @@ public partial class TableView
         set => SetValue(CellHintTextFontSizeProperty, value);
     }
 
+    public string? CellHintFontFamily
+    {
+        get => (string?)GetValue(CellHintFontFamilyProperty);
+        set => SetValue(CellHintFontFamilyProperty, value);
+    }
+
+    public FontAttributes? CellHintFontAttributes
+    {
+        get => (FontAttributes?)GetValue(CellHintFontAttributesProperty);
+        set => SetValue(CellHintFontAttributesProperty, value);
+    }
+
     #endregion
 
     #region Cell Icon Styling
@@ -190,7 +310,7 @@ public partial class TableView
         propertyChanged: OnGlobalStyleChanged);
 
     public static readonly BindableProperty CellIconRadiusProperty = BindableProperty.Create(
-        nameof(CellIconRadius), typeof(double), typeof(TableView), -1d,
+        nameof(CellIconRadius), typeof(double), typeof(TableView), 6d,
         propertyChanged: OnGlobalStyleChanged);
 
     public double CellIconSize
@@ -241,6 +361,14 @@ public partial class TableView
         nameof(CellValueTextFontSize), typeof(double), typeof(TableView), -1d,
         propertyChanged: OnGlobalStyleChanged);
 
+    public static readonly BindableProperty CellValueTextFontFamilyProperty = BindableProperty.Create(
+        nameof(CellValueTextFontFamily), typeof(string), typeof(TableView), null,
+        propertyChanged: OnGlobalStyleChanged);
+
+    public static readonly BindableProperty CellValueTextFontAttributesProperty = BindableProperty.Create(
+        nameof(CellValueTextFontAttributes), typeof(FontAttributes?), typeof(TableView), null,
+        propertyChanged: OnGlobalStyleChanged);
+
     public Color? CellValueTextColor
     {
         get => (Color?)GetValue(CellValueTextColorProperty);
@@ -251,6 +379,18 @@ public partial class TableView
     {
         get => (double)GetValue(CellValueTextFontSizeProperty);
         set => SetValue(CellValueTextFontSizeProperty, value);
+    }
+
+    public string? CellValueTextFontFamily
+    {
+        get => (string?)GetValue(CellValueTextFontFamilyProperty);
+        set => SetValue(CellValueTextFontFamilyProperty, value);
+    }
+
+    public FontAttributes? CellValueTextFontAttributes
+    {
+        get => (FontAttributes?)GetValue(CellValueTextFontAttributesProperty);
+        set => SetValue(CellValueTextFontAttributesProperty, value);
     }
 
     #endregion

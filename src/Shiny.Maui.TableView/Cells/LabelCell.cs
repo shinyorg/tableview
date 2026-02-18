@@ -1,6 +1,5 @@
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
-using TvTableView = Shiny.Maui.TableView.Controls.TableView;
 
 namespace Shiny.Maui.TableView.Cells;
 
@@ -20,6 +19,14 @@ public class LabelCell : CellBase
         nameof(ValueTextFontSize), typeof(double), typeof(LabelCell), -1d,
         propertyChanged: (b, o, n) => ((LabelCell)b).UpdateValueTextFontSize());
 
+    public static readonly BindableProperty ValueTextFontFamilyProperty = BindableProperty.Create(
+        nameof(ValueTextFontFamily), typeof(string), typeof(LabelCell), null,
+        propertyChanged: (b, o, n) => ((LabelCell)b).UpdateValueTextFontFamily());
+
+    public static readonly BindableProperty ValueTextFontAttributesProperty = BindableProperty.Create(
+        nameof(ValueTextFontAttributes), typeof(FontAttributes?), typeof(LabelCell), null,
+        propertyChanged: (b, o, n) => ((LabelCell)b).UpdateValueTextFontAttributes());
+
     public string ValueText
     {
         get => (string)GetValue(ValueTextProperty);
@@ -38,6 +45,18 @@ public class LabelCell : CellBase
         set => SetValue(ValueTextFontSizeProperty, value);
     }
 
+    public string? ValueTextFontFamily
+    {
+        get => (string?)GetValue(ValueTextFontFamilyProperty);
+        set => SetValue(ValueTextFontFamilyProperty, value);
+    }
+
+    public FontAttributes? ValueTextFontAttributes
+    {
+        get => (FontAttributes?)GetValue(ValueTextFontAttributesProperty);
+        set => SetValue(ValueTextFontAttributesProperty, value);
+    }
+
     protected override View? CreateAccessoryView()
     {
         _valueLabel = new Label
@@ -51,12 +70,14 @@ public class LabelCell : CellBase
     protected Label ValueLabel => _valueLabel;
 
     private void UpdateValueTextColor()
-    {
-        _valueLabel.TextColor = ResolveColor(ValueTextColor, ParentTableView?.CellValueTextColor, Colors.Gray);
-    }
+        => _valueLabel.TextColor = ResolveColor(ValueTextColor, ParentTableView?.CellValueTextColor, Colors.Gray);
 
     private void UpdateValueTextFontSize()
-    {
-        _valueLabel.FontSize = ResolveDouble(ValueTextFontSize, ParentTableView?.CellValueTextFontSize ?? -1, 16);
-    }
+        => _valueLabel.FontSize = ResolveDouble(ValueTextFontSize, ParentTableView?.CellValueTextFontSize ?? -1, 16);
+
+    private void UpdateValueTextFontFamily()
+        => _valueLabel.FontFamily = ResolveFontFamily(ValueTextFontFamily, ParentTableView?.CellValueTextFontFamily);
+
+    private void UpdateValueTextFontAttributes()
+        => _valueLabel.FontAttributes = ResolveFontAttributes(ValueTextFontAttributes, ParentTableView?.CellValueTextFontAttributes);
 }

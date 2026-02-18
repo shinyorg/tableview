@@ -1,7 +1,6 @@
 using System.Windows.Input;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
-using TvTableView = Shiny.Maui.TableView.Controls.TableView;
 
 namespace Shiny.Maui.TableView.Cells;
 
@@ -22,9 +21,21 @@ public class EntryCell : CellBase
         nameof(ValueTextFontSize), typeof(double), typeof(EntryCell), -1d,
         propertyChanged: (b, o, n) => ((EntryCell)b).UpdateEntryFontSize());
 
+    public static readonly BindableProperty ValueTextFontFamilyProperty = BindableProperty.Create(
+        nameof(ValueTextFontFamily), typeof(string), typeof(EntryCell), null,
+        propertyChanged: (b, o, n) => ((EntryCell)b).UpdateEntryFontFamily());
+
+    public static readonly BindableProperty ValueTextFontAttributesProperty = BindableProperty.Create(
+        nameof(ValueTextFontAttributes), typeof(FontAttributes?), typeof(EntryCell), null,
+        propertyChanged: (b, o, n) => ((EntryCell)b).UpdateEntryFontAttributes());
+
     public static readonly BindableProperty PlaceholderProperty = BindableProperty.Create(
         nameof(Placeholder), typeof(string), typeof(EntryCell), string.Empty,
         propertyChanged: (b, o, n) => ((EntryCell)b)._entry.Placeholder = (string)n);
+
+    public static readonly BindableProperty PlaceholderColorProperty = BindableProperty.Create(
+        nameof(PlaceholderColor), typeof(Color), typeof(EntryCell), null,
+        propertyChanged: (b, o, n) => { if (n is Color c) ((EntryCell)b)._entry.PlaceholderColor = c; });
 
     public static readonly BindableProperty KeyboardProperty = BindableProperty.Create(
         nameof(Keyboard), typeof(Keyboard), typeof(EntryCell), Keyboard.Default,
@@ -33,6 +44,18 @@ public class EntryCell : CellBase
     public static readonly BindableProperty IsPasswordProperty = BindableProperty.Create(
         nameof(IsPassword), typeof(bool), typeof(EntryCell), false,
         propertyChanged: (b, o, n) => ((EntryCell)b)._entry.IsPassword = (bool)n);
+
+    public static readonly BindableProperty MaxLengthProperty = BindableProperty.Create(
+        nameof(MaxLength), typeof(int), typeof(EntryCell), -1,
+        propertyChanged: (b, o, n) =>
+        {
+            var cell = (EntryCell)b;
+            cell._entry.MaxLength = (int)n > 0 ? (int)n : int.MaxValue;
+        });
+
+    public static readonly BindableProperty TextAlignmentProperty = BindableProperty.Create(
+        nameof(TextAlignment), typeof(TextAlignment), typeof(EntryCell), TextAlignment.End,
+        propertyChanged: (b, o, n) => ((EntryCell)b)._entry.HorizontalTextAlignment = (TextAlignment)n);
 
     public static readonly BindableProperty CompletedCommandProperty = BindableProperty.Create(
         nameof(CompletedCommand), typeof(ICommand), typeof(EntryCell), null);
@@ -55,10 +78,28 @@ public class EntryCell : CellBase
         set => SetValue(ValueTextFontSizeProperty, value);
     }
 
+    public string? ValueTextFontFamily
+    {
+        get => (string?)GetValue(ValueTextFontFamilyProperty);
+        set => SetValue(ValueTextFontFamilyProperty, value);
+    }
+
+    public FontAttributes? ValueTextFontAttributes
+    {
+        get => (FontAttributes?)GetValue(ValueTextFontAttributesProperty);
+        set => SetValue(ValueTextFontAttributesProperty, value);
+    }
+
     public string Placeholder
     {
         get => (string)GetValue(PlaceholderProperty);
         set => SetValue(PlaceholderProperty, value);
+    }
+
+    public Color? PlaceholderColor
+    {
+        get => (Color?)GetValue(PlaceholderColorProperty);
+        set => SetValue(PlaceholderColorProperty, value);
     }
 
     public Keyboard Keyboard
@@ -73,11 +114,25 @@ public class EntryCell : CellBase
         set => SetValue(IsPasswordProperty, value);
     }
 
+    public int MaxLength
+    {
+        get => (int)GetValue(MaxLengthProperty);
+        set => SetValue(MaxLengthProperty, value);
+    }
+
+    public TextAlignment TextAlignment
+    {
+        get => (TextAlignment)GetValue(TextAlignmentProperty);
+        set => SetValue(TextAlignmentProperty, value);
+    }
+
     public ICommand? CompletedCommand
     {
         get => (ICommand?)GetValue(CompletedCommandProperty);
         set => SetValue(CompletedCommandProperty, value);
     }
+
+    public event EventHandler? Completed;
 
     protected override View? CreateAccessoryView()
     {
@@ -95,11 +150,14 @@ public class EntryCell : CellBase
         };
         _entry.Completed += (s, e) =>
         {
+            Completed?.Invoke(this, EventArgs.Empty);
             if (CompletedCommand?.CanExecute(ValueText) == true)
                 CompletedCommand.Execute(ValueText);
         };
         return _entry;
     }
+
+    public void SetFocus() => _entry?.Focus();
 
     private void OnValueTextChanged(string newValue)
     {
@@ -108,14 +166,16 @@ public class EntryCell : CellBase
     }
 
     private void UpdateEntryColor()
-    {
-        _entry.TextColor = ResolveColor(ValueTextColor, ParentTableView?.CellValueTextColor, Colors.Black);
-    }
+        => _entry.TextColor = ResolveColor(ValueTextColor, ParentTableView?.CellValueTextColor, Colors.Black);
 
     private void UpdateEntryFontSize()
-    {
-        _entry.FontSize = ResolveDouble(ValueTextFontSize, ParentTableView?.CellValueTextFontSize ?? -1, 16);
-    }
+        => _entry.FontSize = ResolveDouble(ValueTextFontSize, ParentTableView?.CellValueTextFontSize ?? -1, 16);
+
+    private void UpdateEntryFontFamily()
+        => _entry.FontFamily = ResolveFontFamily(ValueTextFontFamily, ParentTableView?.CellValueTextFontFamily);
+
+    private void UpdateEntryFontAttributes()
+        => _entry.FontAttributes = ResolveFontAttributes(ValueTextFontAttributes, ParentTableView?.CellValueTextFontAttributes);
 
     protected override void OnTapped()
     {

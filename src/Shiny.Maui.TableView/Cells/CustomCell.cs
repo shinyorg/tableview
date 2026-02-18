@@ -1,7 +1,6 @@
 using System.Windows.Input;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
-using TvTableView = Shiny.Maui.TableView.Controls.TableView;
 
 namespace Shiny.Maui.TableView.Cells;
 
@@ -31,6 +30,9 @@ public class CustomCell : CellBase
     public static readonly BindableProperty ShowArrowProperty = BindableProperty.Create(
         nameof(ShowArrow), typeof(bool), typeof(CustomCell), false,
         propertyChanged: (b, o, n) => ((CustomCell)b).UpdateArrowVisibility());
+
+    public static readonly BindableProperty KeepSelectedUntilBackProperty = BindableProperty.Create(
+        nameof(KeepSelectedUntilBack), typeof(bool), typeof(CustomCell), false);
 
     private Label? _arrowLabel;
 
@@ -76,9 +78,15 @@ public class CustomCell : CellBase
         set => SetValue(ShowArrowProperty, value);
     }
 
+    public bool KeepSelectedUntilBack
+    {
+        get => (bool)GetValue(KeepSelectedUntilBackProperty);
+        set => SetValue(KeepSelectedUntilBackProperty, value);
+    }
+
     public CustomCell()
     {
-        // Add long press gesture
+        // Double-tap for long command (MAUI has no built-in long-press gesture)
         var longPress = new TapGestureRecognizer { NumberOfTapsRequired = 2 };
         longPress.Tapped += OnLongPressed;
         GestureRecognizers.Add(longPress);
@@ -93,7 +101,6 @@ public class CustomCell : CellBase
     {
         if (UseFullSize && CustomContent != null)
         {
-            // Replace entire cell content with custom content
             Content = CustomContent;
         }
         else
@@ -109,37 +116,65 @@ public class CustomCell : CellBase
         var grid = RootGrid;
         if (grid == null) return;
 
-        // Place custom content in accessory column
-        Grid.SetColumn(CustomContent, 2);
-        Grid.SetRowSpan(CustomContent, 2);
-        CustomContent.VerticalOptions = LayoutOptions.Center;
+        var layout = new HorizontalStackLayout
+        {
+            VerticalOptions = LayoutOptions.Center,
+            Spacing = 4
+        };
+        layout.Children.Add(CustomContent);
+
+        if (ShowArrow)
+        {
+            EnsureArrowLabel();
+            layout.Children.Add(_arrowLabel!);
+        }
+
+        Grid.SetColumn(layout, 2);
+        Grid.SetRowSpan(layout, 2);
 
         // Remove old accessory if present
         if (AccessoryView != null && grid.Children.Contains(AccessoryView))
             grid.Children.Remove(AccessoryView);
 
-        grid.Children.Add(CustomContent);
+        grid.Children.Add(layout);
+    }
+
+    private void EnsureArrowLabel()
+    {
+        _arrowLabel ??= new Label
+        {
+            Text = "\u203A",
+            FontSize = 20,
+            VerticalOptions = LayoutOptions.Center,
+            TextColor = Colors.Gray
+        };
     }
 
     private void UpdateArrowVisibility()
     {
-        if (ShowArrow && _arrowLabel == null)
-        {
-            _arrowLabel = new Label
-            {
-                Text = "\u203A",
-                FontSize = 20,
-                VerticalOptions = LayoutOptions.Center,
-                TextColor = Colors.Gray
-            };
-        }
-
-        if (_arrowLabel != null)
-            _arrowLabel.IsVisible = ShowArrow;
+        // Rebuild layout to include/exclude arrow
+        if (!UseFullSize)
+            UpdateAccessoryContent();
     }
+
+    protected override bool ShouldKeepSelection() => KeepSelectedUntilBack;
 
     protected override void OnTapped()
     {
+        if (KeepSelectedUntilBack)
+        {
+            var page = GetParentPage();
+            if (page != null)
+            {
+                void handler(object? s, EventArgs args)
+                {
+                    ClearSelectionHighlight();
+                    page.Appearing -= handler;
+                }
+                page.Appearing += handler;
+            }
+        }
+
         if (Command?.CanExecute(CommandParameter) == true)
             Command.Execute(CommandParameter);
     }

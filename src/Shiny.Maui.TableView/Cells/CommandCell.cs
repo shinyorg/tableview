@@ -1,7 +1,6 @@
 using System.Windows.Input;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
-using TvTableView = Shiny.Maui.TableView.Controls.TableView;
 
 namespace Shiny.Maui.TableView.Cells;
 
@@ -18,6 +17,9 @@ public class CommandCell : LabelCell
     public static readonly BindableProperty ShowArrowProperty = BindableProperty.Create(
         nameof(ShowArrow), typeof(bool), typeof(CommandCell), true,
         propertyChanged: (b, o, n) => ((CommandCell)b)._arrowLabel.IsVisible = (bool)n);
+
+    public static readonly BindableProperty KeepSelectedUntilBackProperty = BindableProperty.Create(
+        nameof(KeepSelectedUntilBack), typeof(bool), typeof(CommandCell), false);
 
     public ICommand? Command
     {
@@ -37,12 +39,17 @@ public class CommandCell : LabelCell
         set => SetValue(ShowArrowProperty, value);
     }
 
+    public bool KeepSelectedUntilBack
+    {
+        get => (bool)GetValue(KeepSelectedUntilBackProperty);
+        set => SetValue(KeepSelectedUntilBackProperty, value);
+    }
+
     public CommandCell()
     {
-        // Add arrow indicator after the value label
         _arrowLabel = new Label
         {
-            Text = "\u203A", // single right-pointing angle
+            Text = "\u203A",
             FontSize = 20,
             VerticalOptions = LayoutOptions.Center,
             TextColor = Colors.Gray,
@@ -55,7 +62,6 @@ public class CommandCell : LabelCell
             Spacing = 4
         };
 
-        // Move existing ValueLabel into the HorizontalStack
         if (AccessoryView is Label valueLabel)
         {
             var parent = valueLabel.Parent as Layout;
@@ -64,7 +70,6 @@ public class CommandCell : LabelCell
         }
         accessoryLayout.Children.Add(_arrowLabel);
 
-        // Replace accessory in grid
         Grid.SetColumn(accessoryLayout, 2);
         Grid.SetRowSpan(accessoryLayout, 2);
 
@@ -74,8 +79,24 @@ public class CommandCell : LabelCell
         grid.Children.Add(accessoryLayout);
     }
 
+    protected override bool ShouldKeepSelection() => KeepSelectedUntilBack;
+
     protected override void OnTapped()
     {
+        if (KeepSelectedUntilBack)
+        {
+            var page = GetParentPage();
+            if (page != null)
+            {
+                void handler(object? s, EventArgs args)
+                {
+                    ClearSelectionHighlight();
+                    page.Appearing -= handler;
+                }
+                page.Appearing += handler;
+            }
+        }
+
         if (Command?.CanExecute(CommandParameter) == true)
             Command.Execute(CommandParameter);
     }

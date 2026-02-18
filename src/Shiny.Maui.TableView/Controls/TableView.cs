@@ -3,6 +3,7 @@ using System.Collections.Specialized;
 using System.Windows.Input;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
+using Shiny.Maui.TableView.Cells;
 using Shiny.Maui.TableView.Infrastructure;
 using TvTableSection = Shiny.Maui.TableView.Sections.TableSection;
 using TvTableRoot = Shiny.Maui.TableView.Sections.TableRoot;
@@ -82,7 +83,6 @@ public partial class TableView : ContentView
     public static readonly BindableProperty ItemDroppedCommandProperty = BindableProperty.Create(
         nameof(ItemDroppedCommand), typeof(ICommand), typeof(TableView), null);
 
-    // View-level ItemsSource for dynamic section generation
     public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(
         nameof(ItemsSource), typeof(IEnumerable), typeof(TableView), null,
         propertyChanged: OnViewItemsSourceChanged);
@@ -94,6 +94,30 @@ public partial class TableView : ContentView
     public static readonly BindableProperty TemplateStartIndexProperty = BindableProperty.Create(
         nameof(TemplateStartIndex), typeof(int), typeof(TableView), 0,
         propertyChanged: (b, o, n) => ((TableView)b).RegenerateTemplatedSections());
+
+    public static readonly BindableProperty ScrollToTopProperty = BindableProperty.Create(
+        nameof(ScrollToTop), typeof(bool), typeof(TableView), false,
+        propertyChanged: async (b, o, n) =>
+        {
+            if ((bool)n)
+            {
+                var tv = (TableView)b;
+                await tv.ScrollToTopAsync();
+                tv.ScrollToTop = false;
+            }
+        });
+
+    public static readonly BindableProperty ScrollToBottomProperty = BindableProperty.Create(
+        nameof(ScrollToBottom), typeof(bool), typeof(TableView), false,
+        propertyChanged: async (b, o, n) =>
+        {
+            if ((bool)n)
+            {
+                var tv = (TableView)b;
+                await tv.ScrollToBottomAsync();
+                tv.ScrollToBottom = false;
+            }
+        });
 
     #endregion
 
@@ -159,6 +183,26 @@ public partial class TableView : ContentView
         set => SetValue(TemplateStartIndexProperty, value);
     }
 
+    public bool ScrollToTop
+    {
+        get => (bool)GetValue(ScrollToTopProperty);
+        set => SetValue(ScrollToTopProperty, value);
+    }
+
+    public bool ScrollToBottom
+    {
+        get => (bool)GetValue(ScrollToBottomProperty);
+        set => SetValue(ScrollToBottomProperty, value);
+    }
+
+    #endregion
+
+    #region Events
+
+    public event EventHandler<ItemDroppedEventArgs>? ItemDropped;
+    public event EventHandler? ModelChanged;
+    public event EventHandler<CellPropertyChangedEventArgs>? CellPropertyChanged;
+
     #endregion
 
     #region Rendering
@@ -166,6 +210,7 @@ public partial class TableView : ContentView
     private void OnRootChanged(object? sender, EventArgs e)
     {
         RenderSections();
+        ModelChanged?.Invoke(this, EventArgs.Empty);
     }
 
     internal void RenderSections()
@@ -296,15 +341,22 @@ public partial class TableView : ContentView
 
     #region Drag & Drop
 
-    internal void RaiseItemDropped(TvTableSection section, int fromIndex, int toIndex)
+    internal void RaiseItemDropped(TvTableSection section, CellBase cell, int fromIndex, int toIndex)
     {
-        var args = new ItemDroppedEventArgs(section, fromIndex, toIndex);
+        var args = new ItemDroppedEventArgs(section, cell, fromIndex, toIndex);
         ItemDropped?.Invoke(this, args);
         if (ItemDroppedCommand?.CanExecute(args) == true)
             ItemDroppedCommand.Execute(args);
     }
 
-    public event EventHandler<ItemDroppedEventArgs>? ItemDropped;
+    #endregion
+
+    #region Cell Property Changed
+
+    internal void RaiseCellPropertyChanged(TvTableSection section, CellBase cell, string propertyName)
+    {
+        CellPropertyChanged?.Invoke(this, new CellPropertyChangedEventArgs(section, cell, propertyName));
+    }
 
     #endregion
 
@@ -324,13 +376,29 @@ public partial class TableView : ContentView
 public class ItemDroppedEventArgs : EventArgs
 {
     public TvTableSection Section { get; }
+    public CellBase Cell { get; }
     public int FromIndex { get; }
     public int ToIndex { get; }
 
-    public ItemDroppedEventArgs(TvTableSection section, int fromIndex, int toIndex)
+    public ItemDroppedEventArgs(TvTableSection section, CellBase cell, int fromIndex, int toIndex)
     {
         Section = section;
+        Cell = cell;
         FromIndex = fromIndex;
         ToIndex = toIndex;
+    }
+}
+
+public class CellPropertyChangedEventArgs : EventArgs
+{
+    public TvTableSection Section { get; }
+    public CellBase Cell { get; }
+    public string PropertyName { get; }
+
+    public CellPropertyChangedEventArgs(TvTableSection section, CellBase cell, string propertyName)
+    {
+        Section = section;
+        Cell = cell;
+        PropertyName = propertyName;
     }
 }

@@ -19,9 +19,9 @@ public class PickerDemoViewModel : INotifyPropertyChanged
     private int _selectedColorIndex;
     private object? _selectedCountry;
     private IList? _selectedHobbies;
-    private DateTime _startDate = DateTime.Today;
+    private DateTime? _startDate = DateTime.Today;
     private TimeSpan _reminderTime = new(9, 0, 0);
-    private int _repeatCount = 1;
+    private int? _repeatCount = 1;
 
     public IList<string> Colors { get; } = new List<string>
     {
@@ -43,9 +43,9 @@ public class PickerDemoViewModel : INotifyPropertyChanged
     public int SelectedColorIndex { get => _selectedColorIndex; set => SetProperty(ref _selectedColorIndex, value); }
     public object? SelectedCountry { get => _selectedCountry; set => SetProperty(ref _selectedCountry, value); }
     public IList? SelectedHobbies { get => _selectedHobbies; set => SetProperty(ref _selectedHobbies, value); }
-    public DateTime StartDate { get => _startDate; set => SetProperty(ref _startDate, value); }
+    public DateTime? StartDate { get => _startDate; set => SetProperty(ref _startDate, value); }
     public TimeSpan ReminderTime { get => _reminderTime; set => SetProperty(ref _reminderTime, value); }
-    public int RepeatCount { get => _repeatCount; set => SetProperty(ref _repeatCount, value); }
+    public int? RepeatCount { get => _repeatCount; set => SetProperty(ref _repeatCount, value); }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 

@@ -1,6 +1,5 @@
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
-using TvTableView = Shiny.Maui.TableView.Controls.TableView;
 
 namespace Shiny.Maui.TableView.Cells;
 
@@ -13,6 +12,9 @@ public class SimpleCheckCell : CellBase
         BindingMode.TwoWay,
         propertyChanged: (b, o, n) => ((SimpleCheckCell)b).UpdateCheckVisibility());
 
+    public static readonly BindableProperty ValueProperty = BindableProperty.Create(
+        nameof(Value), typeof(object), typeof(SimpleCheckCell), null);
+
     public static readonly BindableProperty AccentColorProperty = BindableProperty.Create(
         nameof(AccentColor), typeof(Color), typeof(SimpleCheckCell), null,
         propertyChanged: (b, o, n) => ((SimpleCheckCell)b).UpdateCheckColor());
@@ -21,6 +23,12 @@ public class SimpleCheckCell : CellBase
     {
         get => (bool)GetValue(CheckedProperty);
         set => SetValue(CheckedProperty, value);
+    }
+
+    public object? Value
+    {
+        get => GetValue(ValueProperty);
+        set => SetValue(ValueProperty, value);
     }
 
     public Color? AccentColor

@@ -47,6 +47,10 @@ public class TableSection : BindableObject
         nameof(IsVisible), typeof(bool), typeof(TableSection), true,
         propertyChanged: (b, o, n) => ((TableSection)b).RaiseSectionChanged());
 
+    public static readonly BindableProperty FooterVisibleProperty = BindableProperty.Create(
+        nameof(FooterVisible), typeof(bool), typeof(TableSection), true,
+        propertyChanged: (b, o, n) => ((TableSection)b).RaiseSectionChanged());
+
     public static readonly BindableProperty HeaderBackgroundColorProperty = BindableProperty.Create(
         nameof(HeaderBackgroundColor), typeof(Color), typeof(TableSection), null);
 
@@ -56,11 +60,29 @@ public class TableSection : BindableObject
     public static readonly BindableProperty HeaderFontSizeProperty = BindableProperty.Create(
         nameof(HeaderFontSize), typeof(double), typeof(TableSection), -1d);
 
+    public static readonly BindableProperty HeaderFontFamilyProperty = BindableProperty.Create(
+        nameof(HeaderFontFamily), typeof(string), typeof(TableSection), null);
+
+    public static readonly BindableProperty HeaderFontAttributesProperty = BindableProperty.Create(
+        nameof(HeaderFontAttributes), typeof(FontAttributes?), typeof(TableSection), null);
+
+    public static readonly BindableProperty HeaderHeightProperty = BindableProperty.Create(
+        nameof(HeaderHeight), typeof(double), typeof(TableSection), -1d);
+
     public static readonly BindableProperty FooterTextColorProperty = BindableProperty.Create(
         nameof(FooterTextColor), typeof(Color), typeof(TableSection), null);
 
     public static readonly BindableProperty FooterFontSizeProperty = BindableProperty.Create(
         nameof(FooterFontSize), typeof(double), typeof(TableSection), -1d);
+
+    public static readonly BindableProperty FooterFontFamilyProperty = BindableProperty.Create(
+        nameof(FooterFontFamily), typeof(string), typeof(TableSection), null);
+
+    public static readonly BindableProperty FooterFontAttributesProperty = BindableProperty.Create(
+        nameof(FooterFontAttributes), typeof(FontAttributes?), typeof(TableSection), null);
+
+    public static readonly BindableProperty FooterBackgroundColorProperty = BindableProperty.Create(
+        nameof(FooterBackgroundColor), typeof(Color), typeof(TableSection), null);
 
     public static readonly BindableProperty ItemsSourceProperty = BindableProperty.Create(
         nameof(ItemsSource), typeof(IEnumerable), typeof(TableSection), null,
@@ -112,6 +134,12 @@ public class TableSection : BindableObject
         set => SetValue(IsVisibleProperty, value);
     }
 
+    public bool FooterVisible
+    {
+        get => (bool)GetValue(FooterVisibleProperty);
+        set => SetValue(FooterVisibleProperty, value);
+    }
+
     public Color? HeaderBackgroundColor
     {
         get => (Color?)GetValue(HeaderBackgroundColorProperty);
@@ -130,6 +158,24 @@ public class TableSection : BindableObject
         set => SetValue(HeaderFontSizeProperty, value);
     }
 
+    public string? HeaderFontFamily
+    {
+        get => (string?)GetValue(HeaderFontFamilyProperty);
+        set => SetValue(HeaderFontFamilyProperty, value);
+    }
+
+    public FontAttributes? HeaderFontAttributes
+    {
+        get => (FontAttributes?)GetValue(HeaderFontAttributesProperty);
+        set => SetValue(HeaderFontAttributesProperty, value);
+    }
+
+    public double HeaderHeight
+    {
+        get => (double)GetValue(HeaderHeightProperty);
+        set => SetValue(HeaderHeightProperty, value);
+    }
+
     public Color? FooterTextColor
     {
         get => (Color?)GetValue(FooterTextColorProperty);
@@ -140,6 +186,24 @@ public class TableSection : BindableObject
     {
         get => (double)GetValue(FooterFontSizeProperty);
         set => SetValue(FooterFontSizeProperty, value);
+    }
+
+    public string? FooterFontFamily
+    {
+        get => (string?)GetValue(FooterFontFamilyProperty);
+        set => SetValue(FooterFontFamilyProperty, value);
+    }
+
+    public FontAttributes? FooterFontAttributes
+    {
+        get => (FontAttributes?)GetValue(FooterFontAttributesProperty);
+        set => SetValue(FooterFontAttributesProperty, value);
+    }
+
+    public Color? FooterBackgroundColor
+    {
+        get => (Color?)GetValue(FooterBackgroundColorProperty);
+        set => SetValue(FooterBackgroundColorProperty, value);
     }
 
     public IEnumerable? ItemsSource
@@ -175,6 +239,19 @@ public class TableSection : BindableObject
     #region Cell Collection
 
     public IReadOnlyList<CellBase> GetVisibleCells()
+    {
+        var all = GetAllCells();
+        // Filter by cell IsVisible
+        var visible = new List<CellBase>(all.Count);
+        foreach (var cell in all)
+        {
+            if (cell.IsVisible)
+                visible.Add(cell);
+        }
+        return visible;
+    }
+
+    internal IReadOnlyList<CellBase> GetAllCells()
     {
         if (_generatedCells.Count == 0)
             return _cells;

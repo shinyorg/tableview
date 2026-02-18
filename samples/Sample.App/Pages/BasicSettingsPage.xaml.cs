@@ -23,9 +23,9 @@ public class BasicSettingsViewModel : INotifyPropertyChanged
     private string _password = string.Empty;
     private string _email = string.Empty;
     private string _selectedTheme = "System";
-    private int _fontSizeValue = 14;
+    private int? _fontSizeValue = 14;
     private TimeSpan _alarmTime = new(7, 0, 0);
-    private DateTime _birthDate = new(1990, 1, 1);
+    private DateTime? _birthDate = new DateTime(1990, 1, 1);
 
     public bool WifiEnabled { get => _wifiEnabled; set => SetProperty(ref _wifiEnabled, value); }
     public bool BluetoothEnabled { get => _bluetoothEnabled; set => SetProperty(ref _bluetoothEnabled, value); }
@@ -35,9 +35,9 @@ public class BasicSettingsViewModel : INotifyPropertyChanged
     public string Password { get => _password; set => SetProperty(ref _password, value); }
     public string Email { get => _email; set => SetProperty(ref _email, value); }
     public string SelectedTheme { get => _selectedTheme; set => SetProperty(ref _selectedTheme, value); }
-    public int FontSizeValue { get => _fontSizeValue; set => SetProperty(ref _fontSizeValue, value); }
+    public int? FontSizeValue { get => _fontSizeValue; set => SetProperty(ref _fontSizeValue, value); }
     public TimeSpan AlarmTime { get => _alarmTime; set => SetProperty(ref _alarmTime, value); }
-    public DateTime BirthDate { get => _birthDate; set => SetProperty(ref _birthDate, value); }
+    public DateTime? BirthDate { get => _birthDate; set => SetProperty(ref _birthDate, value); }
 
     public ICommand AboutCommand { get; }
     public ICommand PrivacyCommand { get; }
@@ -46,9 +46,9 @@ public class BasicSettingsViewModel : INotifyPropertyChanged
     public BasicSettingsViewModel()
     {
         AboutCommand = new Command(async () =>
-            await Application.Current!.Windows[0].Page!.DisplayAlert("About", "Shiny.Maui.TableView Sample v1.0", "OK"));
+            await Application.Current!.Windows[0].Page!.DisplayAlertAsync("About", "Shiny.Maui.TableView Sample v1.0", "OK"));
         PrivacyCommand = new Command(async () =>
-            await Application.Current!.Windows[0].Page!.DisplayAlert("Privacy", "Your data is safe.", "OK"));
+            await Application.Current!.Windows[0].Page!.DisplayAlertAsync("Privacy", "Your data is safe.", "OK"));
         ResetCommand = new Command(() =>
         {
             WifiEnabled = true;
@@ -59,9 +59,9 @@ public class BasicSettingsViewModel : INotifyPropertyChanged
             Password = string.Empty;
             Email = string.Empty;
             SelectedTheme = "System";
-            FontSizeValue = 14;
+            FontSizeValue = (int?)14;
             AlarmTime = new TimeSpan(7, 0, 0);
-            BirthDate = new DateTime(1990, 1, 1);
+            BirthDate = (DateTime?)new DateTime(1990, 1, 1);
         });
     }
 

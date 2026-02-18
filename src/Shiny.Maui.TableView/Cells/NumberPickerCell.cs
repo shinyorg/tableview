@@ -1,6 +1,6 @@
+using System.Windows.Input;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
-using TvTableView = Shiny.Maui.TableView.Controls.TableView;
 
 namespace Shiny.Maui.TableView.Cells;
 
@@ -9,7 +9,7 @@ public class NumberPickerCell : CellBase
     private Label _valueLabel = default!;
 
     public static readonly BindableProperty NumberProperty = BindableProperty.Create(
-        nameof(Number), typeof(int), typeof(NumberPickerCell), 0,
+        nameof(Number), typeof(int?), typeof(NumberPickerCell), null,
         BindingMode.TwoWay,
         propertyChanged: (b, o, n) => ((NumberPickerCell)b).UpdateDisplayText());
 
@@ -17,7 +17,7 @@ public class NumberPickerCell : CellBase
         nameof(Min), typeof(int), typeof(NumberPickerCell), 0);
 
     public static readonly BindableProperty MaxProperty = BindableProperty.Create(
-        nameof(Max), typeof(int), typeof(NumberPickerCell), 100);
+        nameof(Max), typeof(int), typeof(NumberPickerCell), 9999);
 
     public static readonly BindableProperty UnitProperty = BindableProperty.Create(
         nameof(Unit), typeof(string), typeof(NumberPickerCell), string.Empty,
@@ -26,13 +26,16 @@ public class NumberPickerCell : CellBase
     public static readonly BindableProperty PickerTitleProperty = BindableProperty.Create(
         nameof(PickerTitle), typeof(string), typeof(NumberPickerCell), "Enter a number");
 
+    public static readonly BindableProperty SelectedCommandProperty = BindableProperty.Create(
+        nameof(SelectedCommand), typeof(ICommand), typeof(NumberPickerCell), null);
+
     public static readonly BindableProperty ValueTextColorProperty = BindableProperty.Create(
         nameof(ValueTextColor), typeof(Color), typeof(NumberPickerCell), null,
         propertyChanged: (b, o, n) => ((NumberPickerCell)b).UpdateValueColor());
 
-    public int Number
+    public int? Number
     {
-        get => (int)GetValue(NumberProperty);
+        get => (int?)GetValue(NumberProperty);
         set => SetValue(NumberProperty, value);
     }
 
@@ -60,6 +63,12 @@ public class NumberPickerCell : CellBase
         set => SetValue(PickerTitleProperty, value);
     }
 
+    public ICommand? SelectedCommand
+    {
+        get => (ICommand?)GetValue(SelectedCommandProperty);
+        set => SetValue(SelectedCommandProperty, value);
+    }
+
     public Color? ValueTextColor
     {
         get => (Color?)GetValue(ValueTextColorProperty);
@@ -80,7 +89,11 @@ public class NumberPickerCell : CellBase
     private void UpdateDisplayText()
     {
         if (_valueLabel == null) return;
-        _valueLabel.Text = string.IsNullOrEmpty(Unit) ? Number.ToString() : $"{Number} {Unit}";
+
+        if (Number.HasValue)
+            _valueLabel.Text = string.IsNullOrEmpty(Unit) ? Number.Value.ToString() : $"{Number.Value} {Unit}";
+        else
+            _valueLabel.Text = string.Empty;
     }
 
     private void UpdateValueColor()
@@ -97,24 +110,15 @@ public class NumberPickerCell : CellBase
             PickerTitle,
             $"Enter a number between {Min} and {Max}",
             keyboard: Keyboard.Numeric,
-            initialValue: Number.ToString());
+            initialValue: Number?.ToString() ?? string.Empty);
 
         if (result != null && int.TryParse(result, out var value))
         {
             value = Math.Clamp(value, Min, Max);
             Number = value;
-        }
-    }
 
-    private Page? GetParentPage()
-    {
-        Element? current = this;
-        while (current != null)
-        {
-            if (current is Page page)
-                return page;
-            current = current.Parent;
+            if (SelectedCommand?.CanExecute(Number) == true)
+                SelectedCommand.Execute(Number);
         }
-        return null;
     }
 }

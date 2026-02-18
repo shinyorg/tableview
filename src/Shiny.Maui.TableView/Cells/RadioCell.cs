@@ -13,9 +13,10 @@ public class RadioCell : CellBase
         nameof(Value), typeof(object), typeof(RadioCell), null);
 
     public static readonly BindableProperty AccentColorProperty = BindableProperty.Create(
-        nameof(AccentColor), typeof(Color), typeof(RadioCell), null);
+        nameof(AccentColor), typeof(Color), typeof(RadioCell), null,
+        propertyChanged: (b, o, n) => ((RadioCell)b).UpdateAccentColor());
 
-    // Attached property for section-level selected value
+    // Attached property for section-level or tableview-level selected value
     public static readonly BindableProperty SelectedValueProperty = BindableProperty.CreateAttached(
         "SelectedValue", typeof(object), typeof(RadioCell), null,
         BindingMode.TwoWay,
@@ -48,10 +49,15 @@ public class RadioCell : CellBase
 
     private void OnRadioCheckedChanged(object? sender, CheckedChangedEventArgs e)
     {
-        if (e.Value && ParentSection != null)
-        {
+        if (!e.Value) return;
+
+        // Write to Section scope
+        if (ParentSection != null)
             SetSelectedValue(ParentSection, Value);
-        }
+
+        // Also write to TableView scope (global radio groups)
+        if (ParentTableView != null)
+            SetSelectedValue(ParentTableView, Value);
     }
 
     private static void OnSelectedValueChanged(BindableObject bindable, object oldValue, object newValue)
@@ -61,11 +67,27 @@ public class RadioCell : CellBase
             foreach (var cell in section.GetVisibleCells())
             {
                 if (cell is RadioCell radioCell)
-                {
                     radioCell._radioButton.IsChecked = Equals(radioCell.Value, newValue);
+            }
+        }
+        else if (bindable is TvTableView tableView)
+        {
+            foreach (var sec in tableView.GetAllSections())
+            {
+                foreach (var cell in sec.GetVisibleCells())
+                {
+                    if (cell is RadioCell radioCell)
+                        radioCell._radioButton.IsChecked = Equals(radioCell.Value, newValue);
                 }
             }
         }
+    }
+
+    private void UpdateAccentColor()
+    {
+        var color = AccentColor ?? ParentTableView?.CellAccentColor;
+        if (color != null)
+            _radioButton.BorderColor = color;
     }
 
     protected override void OnTapped()

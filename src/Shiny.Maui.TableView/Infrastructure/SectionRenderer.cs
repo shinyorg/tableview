@@ -61,20 +61,37 @@ internal static class SectionRenderer
         var fontSize = section.HeaderFontSize >= 0 ? section.HeaderFontSize
             : tableView.HeaderFontSize >= 0 ? tableView.HeaderFontSize
             : 14;
+        var fontFamily = section.HeaderFontFamily ?? tableView.HeaderFontFamily;
+        var fontAttributes = section.HeaderFontAttributes ?? tableView.HeaderFontAttributes;
+
+        var headerHeight = section.HeaderHeight >= 0 ? section.HeaderHeight
+            : tableView.HeaderHeight >= 0 ? tableView.HeaderHeight
+            : -1;
 
         var headerContainer = new ContentView
         {
             BackgroundColor = headerColor,
-            Padding = new Thickness(tableView.HeaderPadding >= 0 ? tableView.HeaderPadding : 16, 8)
+            Padding = tableView.HeaderPadding
         };
+
+        if (headerHeight >= 0)
+            headerContainer.HeightRequest = headerHeight;
+
+        var verticalAlign = headerHeight >= 0
+            ? ToLayoutOptions(tableView.HeaderTextVerticalAlign)
+            : LayoutOptions.Center;
 
         var headerLabel = new Label
         {
             Text = section.Title,
             TextColor = textColor,
             FontSize = fontSize,
-            FontAttributes = FontAttributes.Bold
+            FontAttributes = fontAttributes,
+            VerticalOptions = verticalAlign
         };
+
+        if (fontFamily != null)
+            headerLabel.FontFamily = fontFamily;
 
         headerContainer.Content = headerLabel;
         layout.Children.Add(headerContainer);
@@ -82,6 +99,9 @@ internal static class SectionRenderer
 
     private static void RenderFooter(VerticalStackLayout layout, TvTableSection section, TvTableView tableView)
     {
+        if (!section.FooterVisible)
+            return;
+
         if (section.FooterView != null)
         {
             layout.Children.Add(section.FooterView);
@@ -91,22 +111,30 @@ internal static class SectionRenderer
         if (string.IsNullOrEmpty(section.FooterText))
             return;
 
+        var bgColor = section.FooterBackgroundColor ?? tableView.FooterBackgroundColor ?? Colors.Transparent;
         var textColor = section.FooterTextColor ?? tableView.FooterTextColor ?? Colors.Gray;
         var fontSize = section.FooterFontSize >= 0 ? section.FooterFontSize
             : tableView.FooterFontSize >= 0 ? tableView.FooterFontSize
             : 12;
+        var fontFamily = section.FooterFontFamily ?? tableView.FooterFontFamily;
+        var fontAttributes = section.FooterFontAttributes ?? tableView.FooterFontAttributes;
 
         var footerContainer = new ContentView
         {
-            Padding = new Thickness(tableView.FooterPadding >= 0 ? tableView.FooterPadding : 16, 4, 16, 8)
+            Padding = tableView.FooterPadding,
+            BackgroundColor = bgColor
         };
 
         var footerLabel = new Label
         {
             Text = section.FooterText,
             TextColor = textColor,
-            FontSize = fontSize
+            FontSize = fontSize,
+            FontAttributes = fontAttributes
         };
+
+        if (fontFamily != null)
+            footerLabel.FontFamily = fontFamily;
 
         footerContainer.Content = footerLabel;
         layout.Children.Add(footerContainer);
@@ -147,10 +175,19 @@ internal static class SectionRenderer
                 if (fromIndex >= 0 && toIndex >= 0 && fromIndex != toIndex)
                 {
                     section.Cells.Move(fromIndex, toIndex);
-                    tableView.RaiseItemDropped(section, fromIndex, toIndex);
+                    tableView.RaiseItemDropped(section, draggedCell, fromIndex, toIndex);
                 }
             }
         };
         cell.GestureRecognizers.Add(drop);
     }
+
+    private static LayoutOptions ToLayoutOptions(LayoutAlignment alignment) => alignment switch
+    {
+        LayoutAlignment.Start => LayoutOptions.Start,
+        LayoutAlignment.Center => LayoutOptions.Center,
+        LayoutAlignment.End => LayoutOptions.End,
+        LayoutAlignment.Fill => LayoutOptions.Fill,
+        _ => LayoutOptions.End
+    };
 }
