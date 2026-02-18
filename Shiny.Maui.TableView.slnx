@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/Solution/">
+    <File Path="Directory.build.props" />
+    <File Path="readme.md" />
+  </Folder>
   <Project Path="Sample/Sample.csproj" />
   <Project Path="src/Shiny.Maui.TableView/Shiny.Maui.TableView.csproj" />
 </Solution>
