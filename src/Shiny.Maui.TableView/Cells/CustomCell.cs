@@ -146,7 +146,7 @@ public class CustomCell : CellBase
             Text = "\u203A",
             FontSize = 20,
             VerticalOptions = LayoutOptions.Center,
-            TextColor = Colors.Gray
+            Opacity = 0.5
         };
     }
 

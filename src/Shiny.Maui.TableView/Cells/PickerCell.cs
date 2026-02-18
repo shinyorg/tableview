@@ -181,7 +181,7 @@ public class PickerCell : CellBase
             Text = "\u203A",
             FontSize = 20,
             VerticalOptions = LayoutOptions.Center,
-            TextColor = Colors.Gray
+            Opacity = 0.5
         };
 
         layout.Children.Add(_valueLabel);
@@ -235,7 +235,11 @@ public class PickerCell : CellBase
 
     private void UpdateValueColor()
     {
-        _valueLabel.TextColor = ResolveColor(ValueTextColor, ParentTableView?.CellValueTextColor, Colors.Gray);
+        var color = ValueTextColor ?? ParentTableView?.CellValueTextColor;
+        if (color != null)
+            _valueLabel.TextColor = color;
+        else
+            _valueLabel.ClearValue(Label.TextColorProperty);
     }
 
     protected override async void OnTapped()

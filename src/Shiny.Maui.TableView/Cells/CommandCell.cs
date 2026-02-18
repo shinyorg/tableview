@@ -52,7 +52,7 @@ public class CommandCell : LabelCell
             Text = "\u203A",
             FontSize = 20,
             VerticalOptions = LayoutOptions.Center,
-            TextColor = Colors.Gray,
+            Opacity = 0.5,
             Margin = new Thickness(4, 0, 0, 0)
         };
 

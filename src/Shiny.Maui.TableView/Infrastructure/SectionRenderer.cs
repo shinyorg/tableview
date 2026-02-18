@@ -56,8 +56,8 @@ internal static class SectionRenderer
         if (string.IsNullOrEmpty(section.Title))
             return;
 
-        var headerColor = section.HeaderBackgroundColor ?? tableView.HeaderBackgroundColor ?? Colors.Transparent;
-        var textColor = section.HeaderTextColor ?? tableView.HeaderTextColor ?? Colors.Gray;
+        var headerColor = section.HeaderBackgroundColor ?? tableView.HeaderBackgroundColor;
+        var textColor = section.HeaderTextColor ?? tableView.HeaderTextColor;
         var fontSize = section.HeaderFontSize >= 0 ? section.HeaderFontSize
             : tableView.HeaderFontSize >= 0 ? tableView.HeaderFontSize
             : 14;
@@ -70,9 +70,10 @@ internal static class SectionRenderer
 
         var headerContainer = new ContentView
         {
-            BackgroundColor = headerColor,
             Padding = tableView.HeaderPadding
         };
+        if (headerColor != null)
+            headerContainer.BackgroundColor = headerColor;
 
         if (headerHeight >= 0)
             headerContainer.HeightRequest = headerHeight;
@@ -84,11 +85,12 @@ internal static class SectionRenderer
         var headerLabel = new Label
         {
             Text = section.Title,
-            TextColor = textColor,
             FontSize = fontSize,
             FontAttributes = fontAttributes,
             VerticalOptions = verticalAlign
         };
+        if (textColor != null)
+            headerLabel.TextColor = textColor;
 
         if (fontFamily != null)
             headerLabel.FontFamily = fontFamily;
@@ -111,8 +113,8 @@ internal static class SectionRenderer
         if (string.IsNullOrEmpty(section.FooterText))
             return;
 
-        var bgColor = section.FooterBackgroundColor ?? tableView.FooterBackgroundColor ?? Colors.Transparent;
-        var textColor = section.FooterTextColor ?? tableView.FooterTextColor ?? Colors.Gray;
+        var bgColor = section.FooterBackgroundColor ?? tableView.FooterBackgroundColor;
+        var textColor = section.FooterTextColor ?? tableView.FooterTextColor;
         var fontSize = section.FooterFontSize >= 0 ? section.FooterFontSize
             : tableView.FooterFontSize >= 0 ? tableView.FooterFontSize
             : 12;
@@ -121,17 +123,19 @@ internal static class SectionRenderer
 
         var footerContainer = new ContentView
         {
-            Padding = tableView.FooterPadding,
-            BackgroundColor = bgColor
+            Padding = tableView.FooterPadding
         };
+        if (bgColor != null)
+            footerContainer.BackgroundColor = bgColor;
 
         var footerLabel = new Label
         {
             Text = section.FooterText,
-            TextColor = textColor,
             FontSize = fontSize,
             FontAttributes = fontAttributes
         };
+        if (textColor != null)
+            footerLabel.TextColor = textColor;
 
         if (fontFamily != null)
             footerLabel.FontFamily = fontFamily;
@@ -142,16 +146,29 @@ internal static class SectionRenderer
 
     private static BoxView CreateSeparator(TvTableView tableView)
     {
-        return new BoxView
+        var separator = new BoxView
         {
             HeightRequest = tableView.SeparatorHeight >= 0 ? tableView.SeparatorHeight : 0.5,
-            Color = tableView.SeparatorColor ?? Colors.LightGray,
-            Margin = new Thickness(tableView.SeparatorPadding >= 0 ? tableView.SeparatorPadding : 16, 0, 0, 0)
+            Margin = new Thickness(tableView.SeparatorPadding >= 0 ? tableView.SeparatorPadding : 16, 0, 0, 0),
+            Opacity = 0.2
         };
+        if (tableView.SeparatorColor != null)
+        {
+            separator.Color = tableView.SeparatorColor;
+            separator.Opacity = 1;
+        }
+        return separator;
     }
 
     private static void AttachDragDrop(CellBase cell, TvTableSection section, TvTableView tableView)
     {
+        // Remove existing drag/drop recognizers to avoid duplicates on re-render
+        for (int i = cell.GestureRecognizers.Count - 1; i >= 0; i--)
+        {
+            if (cell.GestureRecognizers[i] is DragGestureRecognizer or DropGestureRecognizer)
+                cell.GestureRecognizers.RemoveAt(i);
+        }
+
         var drag = new DragGestureRecognizer { CanDrag = true };
         drag.DragStarting += (s, e) =>
         {
@@ -174,7 +191,13 @@ internal static class SectionRenderer
 
                 if (fromIndex >= 0 && toIndex >= 0 && fromIndex != toIndex)
                 {
+                    // Suppress re-render during the move to avoid tearing down the visual tree mid-drag
+                    tableView.SuppressRender = true;
                     section.Cells.Move(fromIndex, toIndex);
+                    tableView.SuppressRender = false;
+
+                    // Now re-render once cleanly
+                    tableView.RenderSections();
                     tableView.RaiseItemDropped(section, draggedCell, fromIndex, toIndex);
                 }
             }

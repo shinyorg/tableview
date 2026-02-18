@@ -98,7 +98,11 @@ public class NumberPickerCell : CellBase
 
     private void UpdateValueColor()
     {
-        _valueLabel.TextColor = ResolveColor(ValueTextColor, ParentTableView?.CellValueTextColor, Colors.Gray);
+        var color = ValueTextColor ?? ParentTableView?.CellValueTextColor;
+        if (color != null)
+            _valueLabel.TextColor = color;
+        else
+            _valueLabel.ClearValue(Label.TextColorProperty);
     }
 
     protected override async void OnTapped()
@@ -111,6 +115,8 @@ public class NumberPickerCell : CellBase
             $"Enter a number between {Min} and {Max}",
             keyboard: Keyboard.Numeric,
             initialValue: Number?.ToString() ?? string.Empty);
+
+        ClearSelectionHighlight();
 
         if (result != null && int.TryParse(result, out var value))
         {

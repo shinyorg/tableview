@@ -422,4 +422,38 @@ public partial class TableView
     }
 
     #endregion
+
+    #region Cell Border
+
+    public static readonly BindableProperty CellBorderColorProperty = BindableProperty.Create(
+        nameof(CellBorderColor), typeof(Color), typeof(TableView), null,
+        propertyChanged: OnGlobalStyleChanged);
+
+    public static readonly BindableProperty CellBorderWidthProperty = BindableProperty.Create(
+        nameof(CellBorderWidth), typeof(double), typeof(TableView), -1d,
+        propertyChanged: OnGlobalStyleChanged);
+
+    public static readonly BindableProperty CellBorderRadiusProperty = BindableProperty.Create(
+        nameof(CellBorderRadius), typeof(double), typeof(TableView), -1d,
+        propertyChanged: OnGlobalStyleChanged);
+
+    public Color? CellBorderColor
+    {
+        get => (Color?)GetValue(CellBorderColorProperty);
+        set => SetValue(CellBorderColorProperty, value);
+    }
+
+    public double CellBorderWidth
+    {
+        get => (double)GetValue(CellBorderWidthProperty);
+        set => SetValue(CellBorderWidthProperty, value);
+    }
+
+    public double CellBorderRadius
+    {
+        get => (double)GetValue(CellBorderRadiusProperty);
+        set => SetValue(CellBorderRadiusProperty, value);
+    }
+
+    #endregion
 }

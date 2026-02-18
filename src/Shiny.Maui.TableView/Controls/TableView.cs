@@ -19,6 +19,7 @@ public partial class TableView : ContentView
     private bool _isRendering;
     private INotifyCollectionChanged? _viewItemsSourceNotifier;
     private readonly List<TvTableSection> _generatedSections = new();
+    internal bool SuppressRender { get; set; }
 
     public TableView()
     {
@@ -205,6 +206,17 @@ public partial class TableView : ContentView
 
     #endregion
 
+    #region BindingContext Propagation
+
+    protected override void OnBindingContextChanged()
+    {
+        base.OnBindingContextChanged();
+        if (_root != null)
+            SetInheritedBindingContext(_root, BindingContext);
+    }
+
+    #endregion
+
     #region Rendering
 
     private void OnRootChanged(object? sender, EventArgs e)
@@ -215,7 +227,7 @@ public partial class TableView : ContentView
 
     internal void RenderSections()
     {
-        if (_isRendering)
+        if (_isRendering || SuppressRender)
             return;
 
         _isRendering = true;

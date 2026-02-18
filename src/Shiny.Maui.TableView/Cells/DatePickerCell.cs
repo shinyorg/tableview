@@ -87,6 +87,7 @@ public class DatePickerCell : CellBase
             MaximumDate = MaximumDate
         };
         _hiddenPicker.DateSelected += (s, e) => Date = e.NewDate;
+        _hiddenPicker.Unfocused += (s, e) => ClearSelectionHighlight();
 
         layout.Children.Add(_hiddenPicker);
         layout.Children.Add(_valueLabel);
@@ -118,7 +119,11 @@ public class DatePickerCell : CellBase
 
     private void UpdateValueColor()
     {
-        _valueLabel.TextColor = ResolveColor(ValueTextColor, ParentTableView?.CellValueTextColor, Colors.Gray);
+        var color = ValueTextColor ?? ParentTableView?.CellValueTextColor;
+        if (color != null)
+            _valueLabel.TextColor = color;
+        else
+            _valueLabel.ClearValue(Label.TextColorProperty);
     }
 
     protected override void OnTapped()

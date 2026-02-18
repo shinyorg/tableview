@@ -52,6 +52,13 @@ public class TableRoot : BindableObject
         RootChanged?.Invoke(this, EventArgs.Empty);
     }
 
+    protected override void OnBindingContextChanged()
+    {
+        base.OnBindingContextChanged();
+        foreach (var section in _sections)
+            SetInheritedBindingContext(section, BindingContext);
+    }
+
     internal TvTableView? ParentTableView { get; set; }
 
     internal void SetParentTableView(TvTableView? tableView)

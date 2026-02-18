@@ -331,6 +331,19 @@ public class TableSection : BindableObject
 
     #endregion
 
+    #region BindingContext Propagation
+
+    protected override void OnBindingContextChanged()
+    {
+        base.OnBindingContextChanged();
+        foreach (var cell in _cells)
+            SetInheritedBindingContext(cell, BindingContext);
+        foreach (var cell in _generatedCells)
+            SetInheritedBindingContext(cell, BindingContext);
+    }
+
+    #endregion
+
     #region Events
 
     public event EventHandler? SectionChanged;

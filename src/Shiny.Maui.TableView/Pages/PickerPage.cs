@@ -51,7 +51,7 @@ public class PickerPage : ContentPage
                 var subLabel = new Label
                 {
                     FontSize = 12,
-                    TextColor = Colors.Gray,
+                    Opacity = 0.6,
                     VerticalOptions = LayoutOptions.Start
                 };
                 subLabel.SetBinding(Label.TextProperty, nameof(PickerItemViewModel.SubDisplayText));

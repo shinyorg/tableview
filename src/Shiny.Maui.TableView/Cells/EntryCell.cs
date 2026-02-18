@@ -166,7 +166,13 @@ public class EntryCell : CellBase
     }
 
     private void UpdateEntryColor()
-        => _entry.TextColor = ResolveColor(ValueTextColor, ParentTableView?.CellValueTextColor, Colors.Black);
+    {
+        var color = ValueTextColor ?? ParentTableView?.CellValueTextColor;
+        if (color != null)
+            _entry.TextColor = color;
+        else
+            _entry.ClearValue(Entry.TextColorProperty);
+    }
 
     private void UpdateEntryFontSize()
         => _entry.FontSize = ResolveDouble(ValueTextFontSize, ParentTableView?.CellValueTextFontSize ?? -1, 16);

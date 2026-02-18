@@ -8,6 +8,7 @@ namespace Shiny.Maui.TableView.Cells;
 
 public abstract class CellBase : ContentView
 {
+    private Border _border = default!;
     private Grid _rootGrid = default!;
     private Image _iconImage = default!;
     private Label _titleLabel = default!;
@@ -114,6 +115,18 @@ public abstract class CellBase : ContentView
             var cell = (CellBase)b;
             cell.HeightRequest = (double)n >= 0 ? (double)n : -1;
         });
+
+    public static readonly BindableProperty BorderColorProperty = BindableProperty.Create(
+        nameof(BorderColor), typeof(Color), typeof(CellBase), null,
+        propertyChanged: (b, o, n) => ((CellBase)b).UpdateBorder());
+
+    public static readonly BindableProperty BorderWidthProperty = BindableProperty.Create(
+        nameof(BorderWidth), typeof(double), typeof(CellBase), -1d,
+        propertyChanged: (b, o, n) => ((CellBase)b).UpdateBorder());
+
+    public static readonly BindableProperty BorderRadiusProperty = BindableProperty.Create(
+        nameof(BorderRadius), typeof(double), typeof(CellBase), -1d,
+        propertyChanged: (b, o, n) => ((CellBase)b).UpdateBorder());
 
     #endregion
 
@@ -251,6 +264,24 @@ public abstract class CellBase : ContentView
         set => SetValue(CellHeightProperty, value);
     }
 
+    public Color? BorderColor
+    {
+        get => (Color?)GetValue(BorderColorProperty);
+        set => SetValue(BorderColorProperty, value);
+    }
+
+    public double BorderWidth
+    {
+        get => (double)GetValue(BorderWidthProperty);
+        set => SetValue(BorderWidthProperty, value);
+    }
+
+    public double BorderRadius
+    {
+        get => (double)GetValue(BorderRadiusProperty);
+        set => SetValue(BorderRadiusProperty, value);
+    }
+
     #endregion
 
     #region Events
@@ -355,13 +386,22 @@ public abstract class CellBase : ContentView
             _rootGrid.Children.Add(_accessoryView);
         }
 
-        Content = _rootGrid;
+        _border = new Border
+        {
+            StrokeThickness = 0,
+            Stroke = Colors.Transparent,
+            Padding = 0,
+            Content = _rootGrid
+        };
+
+        Content = _border;
     }
 
     protected virtual View? CreateAccessoryView() => null;
 
     protected View? AccessoryView => _accessoryView;
     protected Grid RootGrid => _rootGrid;
+    protected Border CellBorder => _border;
     protected Label TitleLabel => _titleLabel;
     protected Label DescriptionLabel => _descriptionLabel;
     protected Label HintLabel => _hintLabel;
@@ -399,6 +439,7 @@ public abstract class CellBase : ContentView
         UpdateIconRadius();
         UpdateCellBackground();
         UpdateCellPadding();
+        UpdateBorder();
     }
 
     protected Color ResolveColor(Color? cellValue, Color? globalValue, Color fallback)
@@ -418,7 +459,13 @@ public abstract class CellBase : ContentView
         => cellValue ?? globalValue;
 
     private void UpdateTitleColor()
-        => _titleLabel.TextColor = ResolveColor(TitleColor, ParentTableView?.CellTitleColor, Colors.Black);
+    {
+        var color = TitleColor ?? ParentTableView?.CellTitleColor;
+        if (color != null)
+            _titleLabel.TextColor = color;
+        else
+            _titleLabel.ClearValue(Label.TextColorProperty);
+    }
 
     private void UpdateTitleFontSize()
         => _titleLabel.FontSize = ResolveDouble(TitleFontSize, ParentTableView?.CellTitleFontSize ?? -1, 16);
@@ -430,7 +477,13 @@ public abstract class CellBase : ContentView
         => _titleLabel.FontAttributes = ResolveFontAttributes(TitleFontAttributes, ParentTableView?.CellTitleFontAttributes);
 
     private void UpdateDescriptionColor()
-        => _descriptionLabel.TextColor = ResolveColor(DescriptionColor, ParentTableView?.CellDescriptionColor, Colors.Gray);
+    {
+        var color = DescriptionColor ?? ParentTableView?.CellDescriptionColor;
+        if (color != null)
+            _descriptionLabel.TextColor = color;
+        else
+            _descriptionLabel.ClearValue(Label.TextColorProperty);
+    }
 
     private void UpdateDescriptionFontSize()
         => _descriptionLabel.FontSize = ResolveDouble(DescriptionFontSize, ParentTableView?.CellDescriptionFontSize ?? -1, 12);
@@ -456,7 +509,13 @@ public abstract class CellBase : ContentView
     }
 
     private void UpdateHintTextColor()
-        => _hintLabel.TextColor = ResolveColor(HintTextColor, ParentTableView?.CellHintTextColor, Colors.Red);
+    {
+        var color = HintTextColor ?? ParentTableView?.CellHintTextColor;
+        if (color != null)
+            _hintLabel.TextColor = color;
+        else
+            _hintLabel.ClearValue(Label.TextColorProperty);
+    }
 
     private void UpdateHintTextFontSize()
         => _hintLabel.FontSize = ResolveDouble(HintTextFontSize, ParentTableView?.CellHintTextFontSize ?? -1, 12);
@@ -497,14 +556,37 @@ public abstract class CellBase : ContentView
 
     private void UpdateCellBackground()
     {
-        var color = ResolveColor(CellBackgroundColor, ParentTableView?.CellBackgroundColor, Colors.White);
-        BackgroundColor = color;
+        var color = CellBackgroundColor ?? ParentTableView?.CellBackgroundColor;
+        if (color != null)
+            BackgroundColor = color;
+        else
+            ClearValue(BackgroundColorProperty);
     }
 
     private void UpdateCellPadding()
     {
         if (ParentTableView?.CellPadding is Thickness padding)
             _rootGrid.Padding = padding;
+    }
+
+    private void UpdateBorder()
+    {
+        var color = BorderColor ?? ParentTableView?.CellBorderColor;
+        var width = ResolveDouble(BorderWidth, ParentTableView?.CellBorderWidth ?? -1, 0);
+        var radius = ResolveDouble(BorderRadius, ParentTableView?.CellBorderRadius ?? -1, 0);
+
+        if (color != null && width > 0)
+        {
+            _border.Stroke = new SolidColorBrush(color);
+            _border.StrokeThickness = width;
+            _border.StrokeShape = new RoundRectangle { CornerRadius = new CornerRadius(radius) };
+        }
+        else
+        {
+            _border.Stroke = Colors.Transparent;
+            _border.StrokeThickness = 0;
+            _border.StrokeShape = new RoundRectangle { CornerRadius = new CornerRadius(radius) };
+        }
     }
 
     #endregion

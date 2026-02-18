@@ -65,6 +65,25 @@
                 <tv:LabelCell Title="Normal cell" ValueText="In custom section" />
                 <tv:EntryCell Title="Styled entry" Placeholder="Type here..." />
             </tv:TableSection>
+
+            <tv:TableSection Title="BORDERS"
+                              FooterText="Per-cell border customization">
+                <tv:LabelCell Title="Blue border"
+                               ValueText="Rounded"
+                               BorderColor="#007AFF"
+                               BorderWidth="1"
+                               BorderRadius="8" />
+                <tv:LabelCell Title="Red thick border"
+                               ValueText="Square"
+                               BorderColor="Red"
+                               BorderWidth="2"
+                               BorderRadius="0" />
+                <tv:CommandCell Title="Pill shape"
+                                 ValueText="Tap me"
+                                 BorderColor="#34C759"
+                                 BorderWidth="1.5"
+                                 BorderRadius="22" />
+            </tv:TableSection>
         </tv:TableRoot>
     </tv:TableView>
 

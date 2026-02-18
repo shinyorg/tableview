@@ -70,7 +70,13 @@ public class LabelCell : CellBase
     protected Label ValueLabel => _valueLabel;
 
     private void UpdateValueTextColor()
-        => _valueLabel.TextColor = ResolveColor(ValueTextColor, ParentTableView?.CellValueTextColor, Colors.Gray);
+    {
+        var color = ValueTextColor ?? ParentTableView?.CellValueTextColor;
+        if (color != null)
+            _valueLabel.TextColor = color;
+        else
+            _valueLabel.ClearValue(Label.TextColorProperty);
+    }
 
     private void UpdateValueTextFontSize()
         => _valueLabel.FontSize = ResolveDouble(ValueTextFontSize, ParentTableView?.CellValueTextFontSize ?? -1, 16);
