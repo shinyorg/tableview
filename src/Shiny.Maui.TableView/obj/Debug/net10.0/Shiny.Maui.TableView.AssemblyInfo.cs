@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Shiny.Maui.TableView")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cb9a4956bd81ce7667da91cd35537bd4963aa3aa")]
 [assembly: System.Reflection.AssemblyProductAttribute("Shiny.Maui.TableView")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Shiny.Maui.TableView")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Sample/Sample.csproj" />
+  <Project Path="src/Shiny.Maui.TableView/Shiny.Maui.TableView.csproj" />
+</Solution>
