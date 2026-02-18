@@ -97,8 +97,7 @@ public class TextPickerCell : CellBase
         _hiddenPicker = new Picker
         {
             Opacity = 0,
-            WidthRequest = 0,
-            HeightRequest = 0,
+            InputTransparent = true,
             Title = PickerTitle
         };
         _hiddenPicker.SelectedIndexChanged += (s, e) =>
@@ -164,6 +163,8 @@ public class TextPickerCell : CellBase
         else
             _valueLabel.ClearValue(Label.TextColorProperty);
     }
+
+    protected override bool ShouldKeepSelection() => true;
 
     protected override void OnTapped()
     {

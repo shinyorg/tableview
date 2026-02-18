@@ -81,8 +81,7 @@ public class DatePickerCell : CellBase
         _hiddenPicker = new DatePicker
         {
             Opacity = 0,
-            WidthRequest = 0,
-            HeightRequest = 0,
+            InputTransparent = true,
             MinimumDate = MinimumDate,
             MaximumDate = MaximumDate
         };
@@ -125,6 +124,8 @@ public class DatePickerCell : CellBase
         else
             _valueLabel.ClearValue(Label.TextColorProperty);
     }
+
+    protected override bool ShouldKeepSelection() => true;
 
     protected override void OnTapped()
     {

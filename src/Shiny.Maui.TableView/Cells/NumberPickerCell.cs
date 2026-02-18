@@ -105,6 +105,8 @@ public class NumberPickerCell : CellBase
             _valueLabel.ClearValue(Label.TextColorProperty);
     }
 
+    protected override bool ShouldKeepSelection() => true;
+
     protected override async void OnTapped()
     {
         var page = GetParentPage();

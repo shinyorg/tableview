@@ -557,10 +557,7 @@ public abstract class CellBase : ContentView
     private void UpdateCellBackground()
     {
         var color = CellBackgroundColor ?? ParentTableView?.CellBackgroundColor;
-        if (color != null)
-            BackgroundColor = color;
-        else
-            ClearValue(BackgroundColorProperty);
+        BackgroundColor = color ?? Colors.Transparent;
     }
 
     private void UpdateCellPadding()

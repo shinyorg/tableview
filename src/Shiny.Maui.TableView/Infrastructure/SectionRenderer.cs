@@ -28,9 +28,14 @@ internal static class SectionRenderer
             cell.ApplyCascadedStyles();
 
             if (section.UseDragSort)
-                AttachDragDrop(cell, section, parentTableView);
-
-            sectionLayout.Children.Add(cell);
+            {
+                var wrappedCell = WrapWithReorderControls(cell, section, parentTableView);
+                sectionLayout.Children.Add(wrappedCell);
+            }
+            else
+            {
+                sectionLayout.Children.Add(cell);
+            }
 
             // Separator between cells (not after last)
             if (i < cells.Count - 1)
@@ -160,49 +165,83 @@ internal static class SectionRenderer
         return separator;
     }
 
-    private static void AttachDragDrop(CellBase cell, TvTableSection section, TvTableView tableView)
+    private static View WrapWithReorderControls(CellBase cell, TvTableSection section, TvTableView tableView)
     {
-        // Remove existing drag/drop recognizers to avoid duplicates on re-render
-        for (int i = cell.GestureRecognizers.Count - 1; i >= 0; i--)
+        var grid = new Grid
         {
-            if (cell.GestureRecognizers[i] is DragGestureRecognizer or DropGestureRecognizer)
-                cell.GestureRecognizers.RemoveAt(i);
-        }
-
-        var drag = new DragGestureRecognizer { CanDrag = true };
-        drag.DragStarting += (s, e) =>
-        {
-            e.Data.Properties["cell"] = cell;
-            e.Data.Properties["section"] = section;
-        };
-        cell.GestureRecognizers.Add(drag);
-
-        var drop = new DropGestureRecognizer { AllowDrop = true };
-        drop.Drop += (s, e) =>
-        {
-            if (e.Data.Properties.TryGetValue("cell", out var draggedObj) &&
-                e.Data.Properties.TryGetValue("section", out var srcSectionObj) &&
-                draggedObj is CellBase draggedCell &&
-                srcSectionObj is TvTableSection srcSection &&
-                srcSection == section)
+            ColumnDefinitions =
             {
-                var fromIndex = section.Cells.IndexOf(draggedCell);
-                var toIndex = section.Cells.IndexOf(cell);
-
-                if (fromIndex >= 0 && toIndex >= 0 && fromIndex != toIndex)
-                {
-                    // Suppress re-render during the move to avoid tearing down the visual tree mid-drag
-                    tableView.SuppressRender = true;
-                    section.Cells.Move(fromIndex, toIndex);
-                    tableView.SuppressRender = false;
-
-                    // Now re-render once cleanly
-                    tableView.RenderSections();
-                    tableView.RaiseItemDropped(section, draggedCell, fromIndex, toIndex);
-                }
+                new ColumnDefinition(GridLength.Star),
+                new ColumnDefinition(GridLength.Auto)
             }
         };
-        cell.GestureRecognizers.Add(drop);
+
+        Grid.SetColumn(cell, 0);
+        grid.Children.Add(cell);
+
+        var upLabel = new Label
+        {
+            Text = "\u25B2",
+            FontSize = 12,
+            VerticalOptions = LayoutOptions.Center,
+            HorizontalOptions = LayoutOptions.Center,
+            Padding = new Thickness(8, 4),
+            Opacity = 0.5
+        };
+        var upTap = new TapGestureRecognizer();
+        upTap.Tapped += (s, e) =>
+        {
+            var index = section.Cells.IndexOf(cell);
+            if (index > 0)
+                MoveCell(tableView, section, cell, index, index - 1);
+        };
+        upLabel.GestureRecognizers.Add(upTap);
+
+        var downLabel = new Label
+        {
+            Text = "\u25BC",
+            FontSize = 12,
+            VerticalOptions = LayoutOptions.Center,
+            HorizontalOptions = LayoutOptions.Center,
+            Padding = new Thickness(8, 4),
+            Opacity = 0.5
+        };
+        var downTap = new TapGestureRecognizer();
+        downTap.Tapped += (s, e) =>
+        {
+            var index = section.Cells.IndexOf(cell);
+            if (index >= 0 && index < section.Cells.Count - 1)
+                MoveCell(tableView, section, cell, index, index + 1);
+        };
+        downLabel.GestureRecognizers.Add(downTap);
+
+        var buttonStack = new VerticalStackLayout
+        {
+            VerticalOptions = LayoutOptions.Center,
+            Spacing = 0,
+            Padding = new Thickness(4, 0, 8, 0)
+        };
+        buttonStack.Children.Add(upLabel);
+        buttonStack.Children.Add(downLabel);
+
+        Grid.SetColumn(buttonStack, 1);
+        grid.Children.Add(buttonStack);
+
+        return grid;
+    }
+
+    private static void MoveCell(TvTableView tableView, TvTableSection section, CellBase cell, int fromIndex, int toIndex)
+    {
+        tableView.SuppressRender = true;
+        section.Cells.Move(fromIndex, toIndex);
+        tableView.SuppressRender = false;
+
+        // Defer re-render to next frame so the current touch event completes first
+        tableView.Dispatcher.Dispatch(() =>
+        {
+            tableView.RenderSections();
+            tableView.RaiseItemDropped(section, cell, fromIndex, toIndex);
+        });
     }
 
     private static LayoutOptions ToLayoutOptions(LayoutAlignment alignment) => alignment switch

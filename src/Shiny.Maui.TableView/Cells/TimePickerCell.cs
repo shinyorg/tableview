@@ -52,8 +52,7 @@ public class TimePickerCell : CellBase
         _hiddenPicker = new TimePicker
         {
             Opacity = 0,
-            WidthRequest = 0,
-            HeightRequest = 0
+            InputTransparent = true
         };
         _hiddenPicker.PropertyChanged += (s, e) =>
         {
@@ -91,6 +90,8 @@ public class TimePickerCell : CellBase
         else
             _valueLabel.ClearValue(Label.TextColorProperty);
     }
+
+    protected override bool ShouldKeepSelection() => true;
 
     protected override void OnTapped()
     {

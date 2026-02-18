@@ -18,7 +18,7 @@ public class BasicSettingsViewModel : INotifyPropertyChanged
     private bool _wifiEnabled = true;
     private bool _bluetoothEnabled;
     private bool _termsAccepted;
-    private bool _darkMode;
+    private bool _darkMode = Application.Current?.RequestedTheme == AppTheme.Dark;
     private string _username = string.Empty;
     private string _password = string.Empty;
     private string _email = string.Empty;
@@ -30,7 +30,18 @@ public class BasicSettingsViewModel : INotifyPropertyChanged
     public bool WifiEnabled { get => _wifiEnabled; set => SetProperty(ref _wifiEnabled, value); }
     public bool BluetoothEnabled { get => _bluetoothEnabled; set => SetProperty(ref _bluetoothEnabled, value); }
     public bool TermsAccepted { get => _termsAccepted; set => SetProperty(ref _termsAccepted, value); }
-    public bool DarkMode { get => _darkMode; set => SetProperty(ref _darkMode, value); }
+    public bool DarkMode
+    {
+        get => _darkMode;
+        set
+        {
+            if (SetProperty(ref _darkMode, value))
+            {
+                if (Application.Current != null)
+                    Application.Current.UserAppTheme = value ? AppTheme.Dark : AppTheme.Light;
+            }
+        }
+    }
     public string Username { get => _username; set => SetProperty(ref _username, value); }
     public string Password { get => _password; set => SetProperty(ref _password, value); }
     public string Email { get => _email; set => SetProperty(ref _email, value); }
