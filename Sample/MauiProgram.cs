@@ -1,6 +1,7 @@
 using Microsoft.Maui.Controls.Hosting;
 using Microsoft.Maui.Hosting;
 using Shiny.Maui.TableView;
+using MauiDevFlow.Agent;
 
 namespace Sample.App;
 
@@ -17,6 +18,10 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
+
+#if DEBUG
+        builder.AddMauiDevFlowAgent();
+#endif
 
         return builder.Build();
     }

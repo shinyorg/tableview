@@ -75,10 +75,9 @@ internal static class SectionRenderer
 
         var headerContainer = new ContentView
         {
-            Padding = tableView.HeaderPadding
+            Padding = tableView.HeaderPadding,
+            BackgroundColor = headerColor ?? GetDefaultHeaderBackgroundColor()
         };
-        if (headerColor != null)
-            headerContainer.BackgroundColor = headerColor;
 
         if (headerHeight >= 0)
             headerContainer.HeightRequest = headerHeight;
@@ -149,20 +148,34 @@ internal static class SectionRenderer
         layout.Children.Add(footerContainer);
     }
 
+    // iOS system separator colors
+    // Light: rgba(60, 60, 67, 0.29)  Dark: rgba(84, 84, 88, 0.6)
+    private static Color GetDefaultSeparatorColor()
+    {
+        var isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
+        return isDark
+            ? Color.FromRgba(84, 84, 88, 153)
+            : Color.FromRgba(60, 60, 67, 74);
+    }
+
+    // iOS grouped table header background
+    // Light: #F2F2F7  Dark: #1C1C1E
+    private static Color GetDefaultHeaderBackgroundColor()
+    {
+        var isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
+        return isDark
+            ? Color.FromRgb(28, 28, 30)
+            : Color.FromRgb(242, 242, 247);
+    }
+
     private static BoxView CreateSeparator(TvTableView tableView)
     {
-        var separator = new BoxView
+        return new BoxView
         {
             HeightRequest = tableView.SeparatorHeight >= 0 ? tableView.SeparatorHeight : 0.5,
             Margin = new Thickness(tableView.SeparatorPadding >= 0 ? tableView.SeparatorPadding : 16, 0, 0, 0),
-            Opacity = 0.2
+            Color = tableView.SeparatorColor ?? GetDefaultSeparatorColor()
         };
-        if (tableView.SeparatorColor != null)
-        {
-            separator.Color = tableView.SeparatorColor;
-            separator.Opacity = 1;
-        }
-        return separator;
     }
 
     private static View WrapWithReorderControls(CellBase cell, TvTableSection section, TvTableView tableView)
@@ -179,53 +192,50 @@ internal static class SectionRenderer
         Grid.SetColumn(cell, 0);
         grid.Children.Add(cell);
 
-        var upLabel = new Label
+        // Drag handle – long-press initiates drag, which disambiguates from ScrollView scrolling
+        var dragHandle = new Label
         {
-            Text = "\u25B2",
-            FontSize = 12,
+            Text = "\u2630",
+            FontSize = 18,
             VerticalOptions = LayoutOptions.Center,
             HorizontalOptions = LayoutOptions.Center,
-            Padding = new Thickness(8, 4),
-            Opacity = 0.5
+            Padding = new Thickness(12, 8),
+            Opacity = 0.4
         };
-        var upTap = new TapGestureRecognizer();
-        upTap.Tapped += (s, e) =>
-        {
-            var index = section.Cells.IndexOf(cell);
-            if (index > 0)
-                MoveCell(tableView, section, cell, index, index - 1);
-        };
-        upLabel.GestureRecognizers.Add(upTap);
 
-        var downLabel = new Label
+        var dragGesture = new DragGestureRecognizer { CanDrag = true };
+        dragGesture.DragStarting += (s, e) =>
         {
-            Text = "\u25BC",
-            FontSize = 12,
-            VerticalOptions = LayoutOptions.Center,
-            HorizontalOptions = LayoutOptions.Center,
-            Padding = new Thickness(8, 4),
-            Opacity = 0.5
+            e.Data.Properties["DragCell"] = cell;
+            e.Data.Properties["DragSection"] = section;
         };
-        var downTap = new TapGestureRecognizer();
-        downTap.Tapped += (s, e) =>
-        {
-            var index = section.Cells.IndexOf(cell);
-            if (index >= 0 && index < section.Cells.Count - 1)
-                MoveCell(tableView, section, cell, index, index + 1);
-        };
-        downLabel.GestureRecognizers.Add(downTap);
+        dragHandle.GestureRecognizers.Add(dragGesture);
 
-        var buttonStack = new VerticalStackLayout
-        {
-            VerticalOptions = LayoutOptions.Center,
-            Spacing = 0,
-            Padding = new Thickness(4, 0, 8, 0)
-        };
-        buttonStack.Children.Add(upLabel);
-        buttonStack.Children.Add(downLabel);
+        Grid.SetColumn(dragHandle, 1);
+        grid.Children.Add(dragHandle);
 
-        Grid.SetColumn(buttonStack, 1);
-        grid.Children.Add(buttonStack);
+        // Each row is a drop target
+        var dropGesture = new DropGestureRecognizer { AllowDrop = true };
+        dropGesture.DragOver += (s, e) =>
+        {
+            e.AcceptedOperation = DataPackageOperation.Copy;
+        };
+        dropGesture.Drop += (s, e) =>
+        {
+            if (e.Data.Properties.TryGetValue("DragCell", out var draggedObj) &&
+                e.Data.Properties.TryGetValue("DragSection", out var sectionObj) &&
+                draggedObj is CellBase draggedCell &&
+                sectionObj is TvTableSection draggedSection &&
+                draggedSection == section &&
+                draggedCell != cell)
+            {
+                var fromIndex = section.Cells.IndexOf(draggedCell);
+                var toIndex = section.Cells.IndexOf(cell);
+                if (fromIndex >= 0 && toIndex >= 0)
+                    MoveCell(tableView, section, draggedCell, fromIndex, toIndex);
+            }
+        };
+        grid.GestureRecognizers.Add(dropGesture);
 
         return grid;
     }

@@ -49,18 +49,18 @@ public class TimePickerCell : CellBase
 
         _hiddenPicker = new TimePicker
         {
-            Opacity = 0.01
         };
         _hiddenPicker.PropertyChanged += (s, e) =>
         {
             if (e.PropertyName == nameof(TimePicker.Time))
                 Time = _hiddenPicker.Time ?? TimeSpan.Zero;
         };
-        _hiddenPicker.Focused += (s, e) => ApplySelectionHighlight();
         _hiddenPicker.Unfocused += (s, e) => ClearSelectionHighlight();
 
-        // Overlay the transparent picker across the entire cell so tapping
-        // anywhere opens the native time dialog (Focus() is unreliable on Android)
+#if ANDROID
+        // Android: overlay the transparent picker across the entire cell so tapping
+        // anywhere opens the native time dialog (Focus() is unreliable on Android).
+        _hiddenPicker.Opacity = 0.01;
         Grid.SetColumn(_hiddenPicker, 0);
         Grid.SetColumnSpan(_hiddenPicker, 3);
         Grid.SetRow(_hiddenPicker, 0);
@@ -69,11 +69,35 @@ public class TimePickerCell : CellBase
 
         UpdateDisplayText();
         return _valueLabel;
+#else
+        // iOS/Mac: hidden zero-size picker in local Grid; Focus() opens native picker
+        _hiddenPicker.Opacity = 0;
+        _hiddenPicker.WidthRequest = 0;
+        _hiddenPicker.HeightRequest = 0;
+
+        var layout = new Grid();
+        layout.Children.Add(_hiddenPicker);
+        layout.Children.Add(_valueLabel);
+
+        UpdateDisplayText();
+        return layout;
+#endif
     }
 
+#if ANDROID
     protected override void OnCellTapped(object? sender, TappedEventArgs e)
     {
-        // Native picker overlay handles all touch interaction
+        // Android: native picker overlay handles all touch interaction
+    }
+#endif
+
+    protected override bool ShouldKeepSelection() => true;
+
+    protected override void OnTapped()
+    {
+#if !ANDROID
+        _hiddenPicker.Focus();
+#endif
     }
 
     private void OnTimeChanged()

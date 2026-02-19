@@ -18,6 +18,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)"/>
+        <PackageReference Include="Redth.MauiDevFlow.Agent" Version="*" />
     </ItemGroup>
 
     <ItemGroup>
