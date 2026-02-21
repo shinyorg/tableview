@@ -34,11 +34,11 @@ jobs:
         run: |
           # Copy skills content only (not plugin manifests)
           # The target repo has its own plugin structure
-          if [ -d "source/skills/shiny-tableview" ]; then
+          if [ -d "source/SKILLS/shiny-tableview" ]; then
             # Remove existing skill directory to ensure clean sync
             rm -rf skills-repo/skills/shiny-tableview
             mkdir -p skills-repo/skills
-            cp -r source/skills/shiny-tableview skills-repo/skills/
+            cp -r source/SKILLS/shiny-tableview skills-repo/skills/
           fi
 
       - name: Create Pull Request
