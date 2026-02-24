@@ -6,6 +6,15 @@ namespace Shiny.Maui.TableView.Cells;
 
 public class EntryCell : CellBase
 {
+    static readonly Style CleanEntryStyle = new(typeof(Entry))
+    {
+        Setters =
+        {
+            new Setter { Property = Entry.BackgroundColorProperty, Value = Colors.Transparent },
+            new Setter { Property = VisualElement.HeightRequestProperty, Value = 40d },
+        }
+    };
+
     private Entry _entry = default!;
 
     public static readonly BindableProperty ValueTextProperty = BindableProperty.Create(
@@ -138,11 +147,13 @@ public class EntryCell : CellBase
     {
         _entry = new Entry
         {
+            Style = CleanEntryStyle,
             VerticalOptions = LayoutOptions.Center,
             HorizontalOptions = LayoutOptions.Fill,
             HorizontalTextAlignment = TextAlignment.End,
             MinimumWidthRequest = 120
         };
+        _entry.HandlerChanged += OnEntryHandlerChanged;
         _entry.TextChanged += (s, e) =>
         {
             if (ValueText != e.NewTextValue)
@@ -186,5 +197,19 @@ public class EntryCell : CellBase
     protected override void OnTapped()
     {
         _entry.Focus();
+    }
+
+    static void OnEntryHandlerChanged(object? sender, EventArgs e)
+    {
+        if (sender is not Entry { Handler.PlatformView: { } platformView })
+            return;
+
+#if ANDROID
+        if (platformView is Android.Widget.EditText editText)
+            editText.Background = null;
+#elif IOS || MACCATALYST
+        if (platformView is UIKit.UITextField textField)
+            textField.BorderStyle = UIKit.UITextBorderStyle.None;
+#endif
     }
 }
