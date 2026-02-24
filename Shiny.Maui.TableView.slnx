@@ -1,18 +1,13 @@
 <Solution>
-  <Folder Name="/Solution/">
-    <File Path=".github\FUNDING.yml" />
-    <File Path=".github\ISSUE_TEMPLATE\bug_report.yml" />
-    <File Path=".github\ISSUE_TEMPLATE\config.yml" />
-    <File Path=".github\ISSUE_TEMPLATE\feature_request.yml" />
-    <File Path=".github\PULL_REQUEST_TEMPLATE.md" />
-    <File Path=".github\workflows\build.yml" />
-    <File Path=".github\workflows\sync-skills.yml" />
-    <File Path="SKILLS\shiny-tableview\SKILL.md" />
-    <File Path="Directory.build.props" />
-    <File Path="nuget.png" />
-    <File Path="nuget.txt" />
-    <File Path="readme.md" />
-  </Folder>
-  <Project Path="Sample/Sample.csproj" />
-  <Project Path="src/Shiny.Maui.TableView/Shiny.Maui.TableView.csproj" />
+    <Folder Name="/Solution/">
+        <File Path=".github\workflows\build.yml"/>
+        <File Path=".github\workflows\sync-skills.yml"/>
+        <File Path="SKILLS\shiny-tableview\SKILL.md"/>
+        <File Path="Directory.build.props"/>
+        <File Path="nuget.png"/>
+        <File Path="nuget.txt"/>
+        <File Path="readme.md"/>
+    </Folder>
+    <Project Path="Sample/Sample.csproj"/>
+    <Project Path="src/Shiny.Maui.TableView/Shiny.Maui.TableView.csproj"/>
 </Solution>
