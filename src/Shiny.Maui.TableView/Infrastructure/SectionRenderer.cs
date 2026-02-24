@@ -91,10 +91,9 @@ internal static class SectionRenderer
             Text = section.Title,
             FontSize = fontSize,
             FontAttributes = fontAttributes,
+            TextColor = textColor ?? GetDefaultHeaderTextColor(),
             VerticalOptions = verticalAlign
         };
-        if (textColor != null)
-            headerLabel.TextColor = textColor;
 
         if (fontFamily != null)
             headerLabel.FontFamily = fontFamily;
@@ -136,10 +135,9 @@ internal static class SectionRenderer
         {
             Text = section.FooterText,
             FontSize = fontSize,
-            FontAttributes = fontAttributes
+            FontAttributes = fontAttributes,
+            TextColor = textColor ?? GetDefaultHeaderTextColor()
         };
-        if (textColor != null)
-            footerLabel.TextColor = textColor;
 
         if (fontFamily != null)
             footerLabel.FontFamily = fontFamily;
@@ -156,6 +154,16 @@ internal static class SectionRenderer
         return isDark
             ? Color.FromRgba(84, 84, 88, 153)
             : Color.FromRgba(60, 60, 67, 74);
+    }
+
+    // iOS secondary label color (used for section header/footer text)
+    // Light: rgba(60, 60, 67, 0.6)  Dark: rgba(235, 235, 245, 0.6)
+    private static Color GetDefaultHeaderTextColor()
+    {
+        var isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
+        return isDark
+            ? Color.FromRgba(235, 235, 245, 153)
+            : Color.FromRgba(60, 60, 67, 153);
     }
 
     // iOS grouped table header background
