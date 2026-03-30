@@ -1,12 +1,13 @@
 using System.Windows.Input;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
+using Shiny.Maui.TableView.Controls;
 
 namespace Shiny.Maui.TableView.Cells;
 
 public class EntryCell : CellBase
 {
-    static readonly Style CleanEntryStyle = new(typeof(Entry))
+    static readonly Style CleanEntryStyle = new(typeof(BorderlessEntry))
     {
         Setters =
         {
@@ -15,7 +16,7 @@ public class EntryCell : CellBase
         }
     };
 
-    private Entry _entry = default!;
+    private BorderlessEntry _entry = default!;
 
     public static readonly BindableProperty ValueTextProperty = BindableProperty.Create(
         nameof(ValueText), typeof(string), typeof(EntryCell), string.Empty,
@@ -145,7 +146,7 @@ public class EntryCell : CellBase
 
     protected override View? CreateAccessoryView()
     {
-        _entry = new Entry
+        _entry = new BorderlessEntry
         {
             Style = CleanEntryStyle,
             VerticalOptions = LayoutOptions.Center,
@@ -153,7 +154,6 @@ public class EntryCell : CellBase
             HorizontalTextAlignment = TextAlignment.End,
             MinimumWidthRequest = 120
         };
-        _entry.HandlerChanged += OnEntryHandlerChanged;
         _entry.TextChanged += (s, e) =>
         {
             if (ValueText != e.NewTextValue)
@@ -197,19 +197,5 @@ public class EntryCell : CellBase
     protected override void OnTapped()
     {
         _entry.Focus();
-    }
-
-    static void OnEntryHandlerChanged(object? sender, EventArgs e)
-    {
-        if (sender is not Entry { Handler.PlatformView: { } platformView })
-            return;
-
-#if ANDROID
-        if (platformView is Android.Widget.EditText editText)
-            editText.Background = null;
-#elif IOS || MACCATALYST
-        if (platformView is UIKit.UITextField textField)
-            textField.BorderStyle = UIKit.UITextBorderStyle.None;
-#endif
     }
 }

@@ -257,6 +257,26 @@ Tapping the cell opens a prompt dialog for numeric input.
 | `SelectedCommand` | `ICommand?` | `null` | Command on selection |
 | `ValueTextColor` | `Color?` | `null` | Value text color |
 
+### DurationPickerCell
+
+Tapping the cell opens a prompt dialog for duration input in `H:MM` format.
+
+```xml
+<tv:DurationPickerCell Title="Session Length"
+                        Duration="{Binding SessionLength, Mode=TwoWay}"
+                        MaxDuration="4:00:00" />
+```
+
+| Property | Type | Default | Description |
+|---|---|---|---|
+| `Duration` | `TimeSpan?` | `null` | Selected duration (two-way) |
+| `MinDuration` | `TimeSpan` | `00:00:00` | Minimum duration |
+| `MaxDuration` | `TimeSpan` | `24:00:00` | Maximum duration |
+| `Format` | `string` | `h\:mm` | Display format string |
+| `PickerTitle` | `string` | `"Enter duration"` | Dialog title |
+| `SelectedCommand` | `ICommand?` | `null` | Command on selection |
+| `ValueTextColor` | `Color?` | `null` | Value text color |
+
 ### PickerCell
 
 A full-page picker for single or multiple selection. Navigates to a selection page on tap.

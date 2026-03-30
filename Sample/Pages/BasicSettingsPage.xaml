@@ -68,6 +68,9 @@
                                     Time="{Binding AlarmTime, Mode=TwoWay}" />
                 <tv:DatePickerCell Title="Birthday"
                                     Date="{Binding BirthDate, Mode=TwoWay}" />
+                <tv:DurationPickerCell Title="Session Length"
+                                        Duration="{Binding SessionLength, Mode=TwoWay}"
+                                        MaxDuration="4:00:00" />
             </tv:TableSection>
 
             <!-- Button -->

@@ -26,6 +26,7 @@ public class BasicSettingsViewModel : INotifyPropertyChanged
     private int? _fontSizeValue = 14;
     private TimeSpan _alarmTime = new(7, 0, 0);
     private DateTime? _birthDate = new DateTime(1990, 1, 1);
+    private TimeSpan? _sessionLength = TimeSpan.FromMinutes(90);
 
     public bool WifiEnabled { get => _wifiEnabled; set => SetProperty(ref _wifiEnabled, value); }
     public bool BluetoothEnabled { get => _bluetoothEnabled; set => SetProperty(ref _bluetoothEnabled, value); }
@@ -49,6 +50,7 @@ public class BasicSettingsViewModel : INotifyPropertyChanged
     public int? FontSizeValue { get => _fontSizeValue; set => SetProperty(ref _fontSizeValue, value); }
     public TimeSpan AlarmTime { get => _alarmTime; set => SetProperty(ref _alarmTime, value); }
     public DateTime? BirthDate { get => _birthDate; set => SetProperty(ref _birthDate, value); }
+    public TimeSpan? SessionLength { get => _sessionLength; set => SetProperty(ref _sessionLength, value); }
 
     public ICommand AboutCommand { get; }
     public ICommand PrivacyCommand { get; }
@@ -73,6 +75,7 @@ public class BasicSettingsViewModel : INotifyPropertyChanged
             FontSizeValue = (int?)14;
             AlarmTime = new TimeSpan(7, 0, 0);
             BirthDate = (DateTime?)new DateTime(1990, 1, 1);
+            SessionLength = TimeSpan.FromMinutes(90);
         });
     }
 

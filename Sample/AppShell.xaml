@@ -6,23 +6,23 @@
     x:Class="Sample.App.AppShell"
     Title="TableView Sample">
 
-    <FlyoutItem Title="Basic Settings" Icon="">
+    <FlyoutItem Title="Basic Settings">
         <ShellContent ContentTemplate="{DataTemplate pages:BasicSettingsPage}" Route="basic" />
     </FlyoutItem>
 
-    <FlyoutItem Title="Dynamic Sections" Icon="">
+    <FlyoutItem Title="Dynamic Sections">
         <ShellContent ContentTemplate="{DataTemplate pages:DynamicSectionsPage}" Route="dynamic" />
     </FlyoutItem>
 
-    <FlyoutItem Title="Drag &amp; Sort" Icon="">
+    <FlyoutItem Title="Drag &amp; Sort">
         <ShellContent ContentTemplate="{DataTemplate pages:DragSortPage}" Route="dragsort" />
     </FlyoutItem>
 
-    <FlyoutItem Title="Picker Demo" Icon="">
+    <FlyoutItem Title="Picker Demo">
         <ShellContent ContentTemplate="{DataTemplate pages:PickerDemoPage}" Route="picker" />
     </FlyoutItem>
 
-    <FlyoutItem Title="Styling" Icon="">
+    <FlyoutItem Title="Styling">
         <ShellContent ContentTemplate="{DataTemplate pages:StylingPage}" Route="styling" />
     </FlyoutItem>
 
