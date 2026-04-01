@@ -1,9 +1,9 @@
 using Microsoft.Maui.Handlers;
 using Shiny.Maui.TableView.Controls;
 
-namespace Shiny.Maui.TableView;
+namespace Shiny;
 
-public static class MauiAppBuilderExtensions
+public static class TableViewMauiAppBuilderExtensions
 {
     public static MauiAppBuilder UseShinyTableView(this MauiAppBuilder builder)
     {

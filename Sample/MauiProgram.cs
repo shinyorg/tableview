@@ -1,7 +1,7 @@
-using Microsoft.Maui.Controls.Hosting;
-using Microsoft.Maui.Hosting;
-using Shiny.Maui.TableView;
+using Shiny;
+#if DEBUG
 using MauiDevFlow.Agent;
+#endif
 
 namespace Sample.App;
 
