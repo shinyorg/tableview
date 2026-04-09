@@ -77,6 +77,27 @@ public class CommandCell : LabelCell
         if (AccessoryView != null)
             grid.Children.Remove(AccessoryView);
         grid.Children.Add(accessoryLayout);
+
+        if (OperatingSystem.IsLinux())
+        {
+            // GTK/Linux: TapGestureRecognizer on ContentView is unreliable,
+            // so overlay a transparent Button (native GtkButton) to capture taps.
+            var tapOverlay = new Button
+            {
+                BackgroundColor = Colors.Transparent,
+                BorderColor = Colors.Transparent,
+                BorderWidth = 0,
+                Padding = 0,
+                CornerRadius = 0,
+                Text = string.Empty
+            };
+            tapOverlay.Clicked += (_, _) => OnCellTapped(this, new TappedEventArgs(null));
+            Grid.SetColumn(tapOverlay, 0);
+            Grid.SetColumnSpan(tapOverlay, 3);
+            Grid.SetRow(tapOverlay, 0);
+            Grid.SetRowSpan(tapOverlay, 2);
+            grid.Children.Add(tapOverlay);
+        }
     }
 
     protected override bool ShouldKeepSelection() => KeepSelectedUntilBack;
