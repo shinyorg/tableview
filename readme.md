@@ -1,3 +1,10 @@
+# MOVED TO [HTTPS://GITHUB.COM/SHINYORG/CONTROLS]
+
+
+
+
+
+
 # Shiny.Maui.TableView
 
 A settings-style TableView for .NET MAUI, inspired by [AiForms.Maui.SettingsView](https://github.com/muak/AiForms.Maui.SettingsView) by Kaoru Nakamura (muak).
